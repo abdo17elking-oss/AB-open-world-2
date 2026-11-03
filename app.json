@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "AB Open World",
+    "slug": "ab-open-world-native",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": false,
+    "assetBundlePatterns": ["**/*"],
+    "android": {"package":"com.abopenworld.nativegame", "versionCode":1},
+    "plugins": ["expo-document-picker"]
+  }
+}
