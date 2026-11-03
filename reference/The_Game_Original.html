@@ -1,0 +1,3215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Liquid Glass 3D World — Professional Home Mirrors</title>
+<style>
+:root{
+  --lg-bg:rgba(255,255,255,.07);
+  --lg-bg-strong:rgba(255,255,255,.10);
+  --lg-edge:rgba(255,255,255,.22);
+  --lg-edge-soft:rgba(255,255,255,.12);
+  --lg-inner:rgba(255,255,255,.18);
+  --lg-blur:blur(28px) saturate(1.6);
+  --lg-blur-soft:blur(18px) saturate(1.4);
+  --text:#fff;
+  --muted:rgba(255,255,255,.52);
+  --water:rgba(180,210,230,.14);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  outline:none}
+input,textarea{ -webkit-user-select:text;user-select:text }
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0c10;color:var(--text);
+font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#ui{position:fixed;inset:0;pointer-events:none}
+
+/* ===== Liquid Glass — BUTTONS ONLY ===== */
+.topbtn,.control,.action,.item,.close,#playBtn,.pause-btn,.menu-btn{
+   
+  backdrop-filter:blur(2px) saturate(0.55);
+  -webkit-backdrop-filter:blur(2px) saturate(1.55);
+  background-color:#00000017;
+  border:none;
+  
+}
+
+button{font:inherit;color:#fff;background:transparent;cursor:pointer;border:none}
+
+.control,.action,.topbtn,.item,.chip,.close,button{
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+}
+
+/* Soft panels / dialogs — NO liquid glass, NO outlines */
+.glass,#status,#selection,#toast,.panel,.splash-card,.pause-card,.menu-card{
+  background:rgba(12,14,18,.42);
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  border:none;
+  box-shadow:none;
+  outline:none;
+}
+
+#status{
+  position:absolute;left:12px;top:calc(env(safe-area-inset-top) + 10px);
+  max-width:46vw;padding:8px 14px;border-radius:14px;font-size:10px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  pointer-events:none;
+}
+#top{
+  position:absolute;right:12px;top:calc(env(safe-area-inset-top) + 10px);
+  display:flex;gap:7px;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;max-width:62vw
+}
+.topbtn{
+  min-width:44px;height:34px;padding:0 12px;border-radius:17px;
+  font-size:10px;font-weight:550;letter-spacing:.02em;
+  color:#FFFFFF80;
+  transition:background .15s, transform .12s, border-color .15s;
+}
+.topbtn:active,.control:active,.action:active,.item:active,.menu-btn:active,.pause-btn:active{
+  transform:scale(.96);
+  background:rgba(255,255,255,.16);
+  border-color:rgba(255,255,255,.28);
+}
+
+#dpad{
+  position:absolute;left:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  width:142px;height:142px;pointer-events:auto
+}
+.control{
+  position:absolute;width:46px;height:46px;border-radius:16px;
+  padding:0;
+  font-size:10px;font-weight:700;letter-spacing:.5px;
+  color:rgba(255,255,255,.9);
+  
+}
+#moveF{left:48px;top:0}#moveL{left:0;top:48px}#moveB{left:48px;top:96px}#moveR{right:0;top:48px}
+
+#actions{
+  position:absolute;right:13px;bottom:calc(env(safe-area-inset-bottom) + 15px);
+  display:flex;flex-wrap:wrap;gap:7px;pointer-events:auto;
+  max-width:min(280px,52vw);justify-content:flex-end
+}
+.action{
+  min-width:58px;height:44px;padding:0 12px;border-radius:20px;
+  font-size:10px;font-weight:550;color:rgba(255,255,255,.9)
+}
+.action.anim-act{
+  min-width:auto;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+}
+
+.panel{
+  position:absolute;right:12px;top:57px;width:min(380px,calc(100vw - 24px));
+  max-height:calc(100vh - 72px);overflow:auto;padding:16px;border-radius:20px;
+  pointer-events:auto;display:none;
+  background:rgba(10,12,16,.55);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  border:none;box-shadow:none;outline:none;
+}
+.panel.open{display:block}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.title{font-size:14px;font-weight:650}.sub{font-size:9px;color:var(--muted);margin-top:3px}
+.close{
+  color:var(--muted);font-size:9px;
+  padding:7px 12px;border-radius:14px;
+  transition:background .15s
+}
+.section{margin-top:14px;padding-top:12px;border-top:none}
+.section:first-of-type{margin-top:0;padding-top:0}
+.row{display:grid;grid-template-columns:1fr 48%;gap:10px;align-items:center;padding:8px 0}
+.row span{font-size:10px}.row small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+input[type=range]{width:100%;accent-color:#e8f0f8;border:0;box-shadow:none;outline:none;background:transparent}
+input[type=color]{
+  width:100%;height:28px;border:none;border-radius:10px;outline:none;
+  background:rgba(255,255,255,.06);padding:2px;box-shadow:none
+}
+input[type=text],input[type=file]{
+  width:100%;padding:9px 12px;border:none;border-radius:12px;outline:none;
+  background:rgba(255,255,255,.06);color:#fff;font-size:10px
+}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.item{
+  border-radius:16px;padding:10px 10px;
+  font-size:10px;font-weight:500;color:rgba(255,255,255,.88);
+  text-align:center;transition:background .15s, transform .12s
+}
+
+#selection{
+  position:absolute;display:none;transform:translate(-50%,-110%);padding:7px 12px;
+  border-radius:12px;font-size:9px;white-space:nowrap;
+  border:none;box-shadow:none;outline:none
+}
+#toast{
+  position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 76px);
+  transform:translateX(-50%);padding:9px 14px;border-radius:12px;font-size:9px;
+  opacity:0;transition:.2s;white-space:nowrap;
+  border:none;box-shadow:none;outline:none
+}
+#toast.show{opacity:1}
+
+@media(max-width:430px){
+  #top{gap:5px}.topbtn{min-width:40px;padding:0 9px}
+  #actions{gap:5px}.action{min-width:52px;padding:0 8px}
+}
+
+button:focus,input:focus,select:focus,textarea:focus,a:focus{
+  outline:none
+}
+
+/* ---- Splash — true liquid glass, no purple ---- */
+#splash{
+  position:fixed;inset:0;z-index:100000;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 36%, rgba(40,48,56,.45) 0%, rgba(8,10,12,.78) 70%);
+  pointer-events:auto;
+  transition:opacity .5s ease, visibility .5s ease;
+  overflow:hidden;
+}
+#splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+#splash .splash-glow{
+  position:absolute;width:min(480px,88vw);height:min(480px,88vw);
+  border-radius:50%;
+  background:radial-gradient(circle, rgba(200,220,235,.10) 0%, transparent 70%);
+  pointer-events:none;filter:blur(20px);
+}
+#splash .splash-brand{
+  position:relative;z-index:2;
+  display:flex;flex-direction:column;align-items:center;
+  margin:0 24px 26px;
+  opacity:0;transform:translateY(12px);
+  animation:splashFadeUp .9s ease forwards .15s;
+}
+#splash .splash-title{
+  font-size:clamp(22px,5.5vw,34px);font-weight:700;letter-spacing:.1em;
+  text-align:center;margin:0;color:rgba(255,255,255,.94);
+  text-shadow:0 2px 24px rgba(0,0,0,.25);
+}
+#splash .splash-tagline{
+  font-size:clamp(11px,2.6vw,13px);font-weight:400;letter-spacing:.16em;
+  text-transform:uppercase;color:rgba(255,255,255,.40);
+  margin:10px 0 0;text-align:center;
+}
+#splash .splash-lines{
+  position:relative;z-index:2;
+  width:min(360px,88vw);height:48px;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:22px;
+}
+#splash .splash-line{
+  position:absolute;left:0;right:0;
+  font-size:clamp(12px,3vw,15px);font-weight:400;
+  color:rgba(255,255,255,.55);
+  text-align:center;letter-spacing:.04em;
+  opacity:0;transform:translateY(10px);
+  transition:opacity .6s ease, transform .6s ease;
+  margin:0;line-height:1.4;pointer-events:none;
+}
+#splash .splash-line.show{opacity:1;transform:translateY(0)}
+#splash .splash-line.dim{opacity:0;transform:translateY(-6px)}
+#splash .splash-card{
+  position:relative;z-index:2;
+  width:min(320px,84vw);
+  padding:20px 22px 18px;
+  border-radius:24px;
+  display:flex;flex-direction:column;align-items:stretch;gap:14px;
+  opacity:0;transform:translateY(14px);
+  animation:splashFadeUp .85s ease forwards .35s;
+}
+#splash .splash-status{
+  font-size:11px;color:rgba(255,255,255,.48);
+  text-align:center;letter-spacing:.05em;min-height:16px;margin:0;
+}
+#splash .splash-bar-wrap{
+  width:100%;height:6px;border-radius:8px;
+  background:rgba(255,255,255,.08);
+  border:none;outline:none;
+  overflow:hidden;
+}
+#splash .splash-bar{
+  height:100%;width:0%;border-radius:8px;
+  background:linear-gradient(90deg,
+    rgba(220,230,240,.30) 0%,
+    rgba(255,255,255,.70) 100%);
+  transition:width .3s ease;
+}
+#splash #playBtn{
+  position:relative;z-index:2;
+  min-width:168px;height:50px;padding:0 34px;border-radius:25px;
+  margin-top:20px;
+  font-size:15px;font-weight:600;letter-spacing:.07em;
+  color:rgba(255,255,255,.92);cursor:pointer;
+  opacity:0;pointer-events:none;
+  transform:translateY(8px);
+  transition:opacity .4s ease, background .2s, transform .2s, border-color .2s;
+}
+#splash #playBtn.ready{
+  opacity:1;pointer-events:auto;transform:translateY(0);
+  border-color:rgba(255,255,255,.28);
+}
+#splash #playBtn.ready:active{transform:scale(.97)}
+@keyframes splashFadeUp{to{opacity:1;transform:translateY(0)}}
+#ui.hidden-boot{visibility:hidden;pointer-events:none}
+
+/* ---- Main Menu — full page ---- */
+#mainMenu{
+  position:fixed;inset:0;z-index:95000;
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at 50% 35%, rgba(32,38,46,.50) 0%, rgba(6,8,10,.82) 72%);
+  pointer-events:auto;
+  transition:opacity .4s ease, visibility .4s ease;
+  padding:calc(env(safe-area-inset-top) + 24px) 20px calc(env(safe-area-inset-bottom) + 24px);
+}
+#mainMenu.open{display:flex}
+#mainMenu.hide{opacity:0;visibility:hidden;pointer-events:none;display:flex}
+#mainMenu .menu-inner{
+  width:min(360px,92vw);
+  display:flex;flex-direction:column;align-items:center;
+}
+#mainMenu .menu-brand{
+  text-align:center;margin-bottom:36px;
+}
+#mainMenu .menu-title{
+  font-size:clamp(26px,6.5vw,40px);font-weight:700;letter-spacing:.12em;
+  color:rgba(255,255,255,.95);margin:0;
+}
+#mainMenu .menu-sub{
+  font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.38);margin:12px 0 0;
+}
+#mainMenu .menu-options{
+  width:100%;
+  display:flex;flex-direction:column;gap:12px;
+}
+#mainMenu .menu-btn{
+  width:100%;height:56px;border-radius:20px;
+  font-size:15px;font-weight:600;letter-spacing:.05em;
+  color:rgba(255,255,255,.94);cursor:pointer;
+  transition:background .15s, transform .12s, border-color .15s;
+  text-align:center;
+  display:flex;align-items:center;justify-content:center;
+}
+#mainMenu .menu-btn:active{transform:scale(.97)}
+#mainMenu .menu-btn.primary{
+  height:60px;font-size:16px;letter-spacing:.08em;
+  border-color:rgba(255,255,255,.30);
+}
+#mainMenu .menu-btn.ghost{
+  height:48px;font-size:13px;font-weight:500;
+  color:rgba(255,255,255,.50);
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.08);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+}
+#mainMenu .menu-divider{
+  width:40%;height:1px;margin:8px auto;
+  background:rgba(255,255,255,.08);border:none;
+}
+#mainMenu .menu-hint{
+  text-align:center;font-size:10px;color:rgba(255,255,255,.28);
+  margin-top:28px;letter-spacing:.08em;line-height:1.5;
+}
+
+/* Pause dialog — plain, no liquid glass */
+#pauseDialog{
+  position:fixed;inset:0;z-index:90000;
+  display:none;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.35);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  pointer-events:auto;
+}
+#pauseDialog.open{display:flex}
+#pauseDialog .pause-card{
+  width:min(280px,82vw);
+  padding:28px 22px 20px;
+  border-radius:22px;
+  display:flex;flex-direction:column;gap:9px;align-items:stretch;
+  border:none;box-shadow:none;outline:none;
+}
+#pauseDialog .pause-title{
+  font-size:12px;font-weight:600;text-align:center;
+  margin:0 0 12px;letter-spacing:.12em;
+  color:rgba(255,255,255,.55);
+  text-transform:uppercase;
+}
+#pauseDialog .pause-btn{
+  height:48px;border-radius:18px;font-size:14px;font-weight:550;
+  color:rgba(255,255,255,.92);cursor:pointer;
+  letter-spacing:.03em;
+  transition:background .15s, transform .12s, border-color .15s;
+}
+#pauseDialog .pause-btn:active{transform:scale(.97);background:rgba(255,255,255,.14)}
+#pauseDialog .pause-btn.resume{
+  margin-top:6px;height:40px;
+  font-size:12px;font-weight:500;
+  color:rgba(255,255,255,.48);
+  background:rgba(255,255,255,.03);
+  border-color:rgba(255,255,255,.08);
+}
+#driveAction{display:none}
+#driveAction.show-drive{display:inline-flex;align-items:center;justify-content:center}
+
+#controlsPanel .joint-bar{display:flex;gap:5px;overflow-x:auto;padding:2px 0 6px;white-space:nowrap}
+#controlsPanel .joint-btn,#controlsPanel .ctrl-btn{flex:0 0 auto;border-radius:12px;background:rgba(255,255,255,.075);padding:8px 10px;font-size:10px;color:#fff}
+#controlsPanel .joint-btn.active{background:rgba(110,190,255,.28)}
+#controlsPanel .controls-row{display:flex;gap:6px;overflow-x:auto;padding:2px 0 5px}
+#controlsPanel .ui-group{display:flex;gap:5px;flex-wrap:nowrap;padding:5px;border-radius:12px;background:rgba(255,255,255,.035)}
+#threeDControlPanel{left:50%;right:auto;top:auto;bottom:calc(env(safe-area-inset-bottom) + 8px);transform:translateX(-50%);width:min(520px,calc(100vw - 20px));max-height:min(62dvh,560px);overflow:auto}
+#mini3dWrap{position:relative;width:100%;height:clamp(340px,58vh,520px);overflow:hidden;border-radius:20px;background:radial-gradient(ellipse at 50% 40%,rgba(130,170,205,.16),rgba(5,8,12,.7));border:1px solid rgba(255,255,255,.12)}
+#mini3d{width:100%;height:100%;display:block;touch-action:none;cursor:grab}#mini3d:active{cursor:grabbing}.miniAxes{position:absolute;left:9px;bottom:8px;display:flex;flex-direction:column;gap:4px;pointer-events:none}.miniAxes span{font-size:10px;color:#e9f7ff;background:rgba(10,20,32,.65);border:1px solid rgba(150,220,255,.24);border-radius:8px;padding:4px 7px;backdrop-filter:blur(10px)}#threeDControlPanel .miniTools{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}#threeDControlPanel .miniTools .item{flex:1 0 auto;min-width:62px;touch-action:manipulation}#threeDControlPanel .head{position:sticky;top:0;z-index:3}
+.miniHint{position:absolute;left:10px;bottom:8px;font-size:9px;color:rgba(255,255,255,.5);pointer-events:none}
+.miniTools{display:flex;gap:7px;margin-top:8px}.miniTools .item{flex:1}
+#threeDControlPanel .head{position:relative}
+@media(max-width:430px){#threeDControlPanel{left:6px;right:6px;transform:none;width:auto;max-height:min(72dvh,640px);bottom:calc(env(safe-area-inset-bottom) + 6px)}#mini3dWrap{height:clamp(320px,52vh,440px)}#top{max-width:94vw;left:8px;right:8px}}
+
+</style>
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="splash">
+  <div class="splash-glow" aria-hidden="true"></div>
+  <div class="splash-brand">
+    <div class="splash-title">AB OPEN WORLD</div>
+    <div class="splash-tagline">Explore · Build · Drive</div>
+  </div>
+  <div class="splash-lines" id="splashLines">
+    <p class="splash-line" data-i="0">Preparing open world environment</p>
+    <p class="splash-line" data-i="1">Loading character systems</p>
+    <p class="splash-line" data-i="2">Restoring your saved world</p>
+    <p class="splash-line" data-i="3">Calibrating lights and camera</p>
+    <p class="splash-line" data-i="4">Almost ready to explore</p>
+  </div>
+  <div class="splash-card">
+    <div class="splash-status" id="splashStatus">Initializing…</div>
+    <div class="splash-bar-wrap"><div class="splash-bar" id="splashBar"></div></div>
+  </div>
+  <button id="playBtn" type="button">Continue</button>
+</div>
+
+<!-- Main Menu — full page after loading -->
+<div id="mainMenu">
+  <div class="menu-inner">
+    <div class="menu-brand">
+      <div class="menu-title">AB OPEN WORLD</div>
+      <div class="menu-sub">Open World Experience</div>
+    </div>
+    <div class="menu-options">
+      <button type="button" class="menu-btn primary" id="menuPlay">Play</button>
+      <button type="button" class="menu-btn" id="menuSettings">World Settings</button>
+      <button type="button" class="menu-btn" id="menuAdd">Add Objects</button>
+      <button type="button" class="menu-btn" id="menuAnim">Animations</button>
+      <div class="menu-divider"></div>
+      <button type="button" class="menu-btn ghost" id="menuExit">Exit</button>
+    </div>
+    <div class="menu-hint">Drag to look around<br>Pinch or scroll to zoom · D-pad to move</div>
+  </div>
+</div>
+
+<div id="pauseDialog">
+  <div class="pause-card">
+    <div class="pause-title">Paused</div>
+    <button type="button" class="pause-btn menu" id="pauseMenu">Main Menu</button>
+    <button type="button" class="pause-btn home" id="pauseHome">Home</button>
+    <button type="button" class="pause-btn exit" id="pauseExit">Exit</button>
+    <button type="button" class="pause-btn resume" id="pauseResume">Resume</button>
+  </div>
+</div>
+
+<div id="ui" class="hidden-boot">
+  <div id="status" class="glass">World ready</div>
+
+  <div id="top">
+    <button id="pause" class="topbtn">Pause</button>
+    <button id="controlBtn" class="topbtn">Control</button><button id="threeDControlBtn" class="topbtn">3D Control</button><button id="animBtn" class="topbtn">Anim</button>
+    <button id="addBtn" class="topbtn">Add</button>
+    <button id="worldBtn" class="topbtn">World</button>
+  </div>
+
+  <div id="dpad">
+    <button id="moveF" class="control" aria-label="Move forward">UP</button>
+    <button id="moveL" class="control" aria-label="Move left">LT</button>
+    <button id="moveB" class="control" aria-label="Move backward">DN</button>
+    <button id="moveR" class="control" aria-label="Move right">RT</button>
+  </div>
+
+  <div id="actions">
+    <button id="jump" class="action">Jump</button>
+    <button id="run" class="action">Run</button>
+    <button id="driveAction" class="action">Drive</button>
+  </div>
+
+  <div id="selection" class="glass"></div>
+  <div id="toast" class="glass"></div>
+
+
+
+  <section id="controlsPanel" class="panel glass">
+    <div class="head"><div><div class="title">Control</div><div class="sub">Joint · pose · height · grip</div></div><button class="close" data-close="controlsPanel">Close</button></div>
+    <div class="section"><div class="sub" style="margin-bottom:5px">Select joint</div><div class="joint-bar" id="jointBar"></div></div>
+    <div class="section"><div class="sub" style="margin-bottom:5px">Joint movement</div><div class="controls-row"><div class="ui-group">
+      <button class="ctrl-btn" data-joint-rot="x,0.15">Flexion (+)</button><button class="ctrl-btn" data-joint-rot="x,-0.15">Extension (−)</button><button class="ctrl-btn" data-joint-rot="z,0.15">Abduction (+)</button><button class="ctrl-btn" data-joint-rot="z,-0.15">Adduction (−)</button><button class="ctrl-btn" data-joint-rot="y,0.15">Int Rot.</button><button class="ctrl-btn" data-joint-rot="y,-0.15">Ext Rot.</button><button class="ctrl-btn" id="resetControlJoint">Reset Joint</button><button class="ctrl-btn" id="resetControlAll">Reset All</button>
+    </div></div></div>
+    <div class="section"><div class="sub" style="margin-bottom:5px">Pose & height</div><div class="controls-row"><div class="ui-group"><button class="ctrl-btn" data-control-pose="supine">Supine</button><button class="ctrl-btn" data-control-pose="prone">Prone</button><button class="ctrl-btn" data-control-pose="stand">Stand</button><button class="ctrl-btn" id="controlElevUp">Elevation Up</button><button class="ctrl-btn" id="controlElevDown">Elevation Down</button></div></div></div>
+    <div class="section"><div class="sub" style="margin-bottom:5px">Animation & interaction</div><div class="controls-row"><div class="ui-group"><button class="ctrl-btn" id="controlIdle">Idle</button><button class="ctrl-btn" id="gripBtn">Grip Item</button></div></div></div>
+    <div class="section"><div class="sub" style="margin-bottom:5px">Saved movements & poses</div><input id="poseName" type="text" placeholder="Pose name (e.g. Wave / Sit)" style="width:100%;margin-bottom:6px"><button class="ctrl-btn" id="savePoseBtn" style="width:100%">＋ Save current pose</button><div id="savedPosesList" style="display:grid;gap:5px;margin-top:7px"></div></div>
+  </section>
+  <section id="threeDControlPanel" class="panel glass">
+    <div class="head"><div><div class="title">3D Control</div><div class="sub">Drag the glowing points to adjust the model</div></div><button class="close" data-close="threeDControlPanel">Close</button></div>
+    <div class="miniTools"><button class="item" id="miniCenter">◎ Center view</button><button class="item" id="resetTransform">↺ Reset</button></div>
+    <div id="mini3dWrap"><canvas id="mini3d"></canvas><div class="miniHint">Touch a white joint point, then drag an XYZ arrow. Drag the center point to move the whole character.</div><div class="miniAxes"><span style="color:#ff6666">X — Red</span><span style="color:#70ff9b">Y — Green</span><span style="color:#69baff">Z — Blue</span></div></div>
+    <div class="miniTools"><button class="item" id="miniResetJoint">Reset joint</button><button class="item" id="miniResetAll">Reset all joints</button></div>
+    <div class="sub" id="miniStatus" style="margin-top:7px">Load a character to begin.</div>
+  </section>
+
+  <section id="animPanel" class="panel glass">
+    <div class="head">
+      <div>
+        <div class="title">Animations</div>
+        <div class="sub">✓ = show as button next to Jump / Run</div>
+      </div>
+      <button class="close" data-close="animPanel">Close</button>
+    </div>
+    <div class="section" style="padding-top:0">
+      <div id="animChecklist" style="display:flex;flex-direction:column;gap:6px;max-height:min(55vh,420px);overflow:auto"></div>
+    </div>
+    <div class="section">
+      <button id="animSelectAll" class="item" style="width:100%;margin-bottom:6px">Select action defaults</button>
+      <button id="animClearAll" class="item" style="width:100%">Clear extra buttons</button>
+    </div>
+</section>
+
+  <section id="worldPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">World</div><div class="sub">Live environment controls</div></div>
+      <button class="close" data-close="worldPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>Time of day<small>0 midnight · 0.25 sunrise · 0.5 noon · 0.75 sunset</small></span><input id="day" type="range" min="0" max="1" step=".001" value=".62"></div>
+      <div class="row"><span>Sun direction<small>Rotate the whole day arc</small></span><input id="sunAngle" type="range" min="0" max="6.283" step=".001" value="3.8"></div>
+      <div class="row"><span>Sky saturation</span><input id="skySat" type="range" min="0" max="1" step=".001" value=".65"></div>
+    </div>
+
+    <div class="section">
+<div class="row"><span>Fog / horizon blend</span><input id="fog" type="range" min="0" max="1" step=".001" value=".35"></div>
+    </div>
+
+    <div class="section">
+      <div class="row"><span>World lighting<small>Sun + sky + fill — lights ground &amp; all GLB objects</small></span><input id="light" type="range" min="0" max="2.5" step=".001" value="1.15"></div>
+      <div class="row"><span>Character front light<small>Man only · Key (upper front)</small></span><input id="charFront" type="range" min="0" max="2.5" step=".001" value="0.7"></div>
+      <div class="row"><span>Character back light<small>Man only · Rim (behind)</small></span><input id="charBack" type="range" min="0" max="2.5" step=".001" value="0.65"></div>
+      <div class="row"><span>Character fill<small>Man only · Soft ambient</small></span><input id="charFill" type="range" min="0" max="2.5" step=".001" value="0.85"></div>
+      <div class="row">
+        <span>Man scale<small>Scale character (×1.1 / ×0.9)</small></span>
+        <div style="display:flex;align-items:center;justify-content:flex-end;gap:8px">
+          <button id="manScaleMinus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">−</button>
+          <span id="manScaleValue" style="min-width:52px;text-align:center;font-size:10px;font-variant-numeric:tabular-nums">0.0300</span>
+          <button id="manScalePlus" class="item" type="button" style="min-width:42px;height:34px;padding:0;font-size:18px;line-height:1">+</button>
+        </div>
+      </div>
+      <div class="row">
+        <span>Camera mode</span>
+        <div style="display:flex;gap:6px;justify-content:flex-end">
+          <button id="btnCamClose" class="item" type="button" style="min-width:56px;height:30px;padding:0 8px;font-size:10px;color:#e8f0f8">Close</button>
+          <button id="btnCamNormal" class="item" type="button" style="min-width:56px;height:30px;padding:0 8px;font-size:10px">Normal</button>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="section">
+      <div class="row"><span>Ground color</span><input id="groundColor" type="color" value="#7a8a6e"></div>
+      <div class="row"><span>Ground brightness<small>0.2 dark · 1 normal · 2.5 bright</small></span>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input id="groundBrightness" type="range" min="0.2" max="2.5" step="0.05" value="1" style="flex:1">
+          <span id="groundBrightnessValue" style="min-width:36px;font-size:10px;font-variant-numeric:tabular-nums">1.00</span>
+        </div>
+      </div>
+    </div>
+    <div class="section">
+      <button id="delete" class="item" style="width:100%">Delete selected object</button>
+      <button id="clearSave" class="item" style="width:100%;margin-top:7px">Reset saved world</button>
+    </div>
+  </section>
+
+  <section id="addPanel" class="panel glass">
+    <div class="head">
+      <div><div class="title">Add to world</div><div class="sub">Objects · import</div></div>
+      <button class="close" data-close="addPanel">Close</button>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button class="item" data-type="Man">Man</button>
+        <button class="item" data-type="Girl">Girl</button>
+        <button class="item" data-type="Home">Home</button>
+        <button class="item" data-type="Car">Car</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="row" style="display:block">
+        <span>Import GLB / GLTF</span>
+        <small style="margin:5px 0 7px">Supports multiple files. Loads one by one to keep the game smooth.</small>
+        <input id="modelFiles" type="file" accept=".glb,.gltf,.bin,.png,.jpg,.jpeg,.webp" multiple>
+      </div>
+      <div class="row" style="display:block">
+        <span>Name (optional)</span>
+        <input id="objectName" type="text" placeholder="Object name">
+      </div>
+      <button id="importModel" class="item" style="width:100%">Import model(s)</button>
+      <button id="scanSavedModels" class="item" style="width:100%;margin-top:6px">📂 Saved local models</button>
+      <div id="savedModelsList" style="display:none;margin-top:7px;max-height:180px;overflow:auto"></div>
+      <div id="importStatus" style="margin-top:8px;font-size:9px;color:var(--muted)"></div>
+    </div>
+
+    <div class="section">
+      <div class="grid">
+        <button id="rotL" class="item">Rotate left</button>
+        <button id="rotR" class="item">Rotate right</button>
+        <button id="raise" class="item">Raise</button>
+        <button id="lower" class="item">Lower</button>
+      </div>
+      <div class="grid" style="margin-top:7px">
+        <button id="scaleMinus" class="item">Scale −</button>
+        <button id="scalePlus" class="item">Scale +</button>
+      </div>
+      <button id="driveBtn" class="item" style="width:100%;margin-top:7px">Drive / Exit vehicle</button>
+      <div style="font-size:8px;color:var(--muted);margin-top:6px">Select from list below only · D-pad moves selected · Scale ± · Drive/E for cars</div>
+    </div>
+
+    <div class="section">
+      <div class="title" style="font-size:12px;margin-bottom:8px">World objects</div>
+      <div id="objectList" style="max-height:180px;overflow:auto;display:flex;flex-direction:column;gap:5px"></div>
+      <div class="grid" style="margin-top:8px">
+        <button id="deselectBtn" class="item">Deselect</button>
+        <button id="deleteSelected" class="item">Delete selected</button>
+        <button id="deleteAllObjs" class="item">Delete all</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+window.addEventListener("error", function(e){
+  var box=document.getElementById("runtimeError");
+  if(!box){box=document.createElement("pre");box.id="runtimeError";box.style="position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;background:#400;color:#fff;padding:12px;font:12px monospace;white-space:pre-wrap;max-height:35vh;overflow:auto";document.body.appendChild(box);}
+  box.textContent="Three.js error: "+(e.message||e.error||"unknown error");
+});
+window.addEventListener("unhandledrejection", function(e){
+  var box=document.getElementById("runtimeError");
+  if(!box){box=document.createElement("pre");box.id="runtimeError";box.style="position:fixed;left:8px;right:8px;bottom:8px;z-index:999999;background:#400;color:#fff;padding:12px;font:12px monospace;white-space:pre-wrap;max-height:35vh;overflow:auto";document.body.appendChild(box);}
+  box.textContent="Three.js promise error: "+e.reason;
+});
+</script>
+<!-- OFFLINE MODE: keep three.module.js beside this HTML and addons in ./three-addons/ -->
+<script type="importmap">
+{"imports":{"three":"./three.module.js","three/addons/loaders/GLTFLoader.js":"./GLTFLoader.js","three/addons/controls/OrbitControls.js":"./OrbitControls.js","three/addons/controls/TransformControls.js":"./TransformControls.js","three/addons/environments/RoomEnvironment.js":"./RoomEnvironment.js"}}
+</script>
+
+<script type="module">
+import * as THREE from "three";
+import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+import {OrbitControls} from "three/addons/controls/OrbitControls.js";
+import {TransformControls} from "three/addons/controls/TransformControls.js";
+import {RoomEnvironment} from "three/addons/environments/RoomEnvironment.js";
+// Reflector removed — shader mirrors (zero extra GPU pass, true sky colors)
+
+const $=id=>document.getElementById(id);
+const canvas=$("view");
+const scene=new THREE.Scene();
+
+const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,12000);
+camera.position.set(0,2.85,6.5);
+
+const renderer=new THREE.WebGLRenderer({
+  canvas,antialias:true,powerPreference:"high-performance"
+});
+renderer.setPixelRatio(Math.min(devicePixelRatio, 3)); // max sharpness
+renderer.setSize(innerWidth,innerHeight,false);
+const orbitControls = new OrbitControls(camera, renderer.domElement);
+// OrbitControls does not guarantee a userData object; create it before camera follow logic uses it.
+orbitControls.userData = orbitControls.userData || {};
+orbitControls.enableDamping = true;
+orbitControls.dampingFactor = 0.09;
+orbitControls.rotateSpeed = 1.15;
+orbitControls.zoomSpeed = 1.15;
+orbitControls.panSpeed = 1.0;
+orbitControls.enableRotate = true;
+orbitControls.enableZoom = true;
+orbitControls.enablePan = true;
+orbitControls.minPolarAngle = 0.025;
+orbitControls.maxPolarAngle = Math.PI * 0.485;
+orbitControls.minDistance = 0.65;
+orbitControls.maxDistance = 125;
+orbitControls.screenSpacePanning = true;
+orbitControls.addEventListener('change',()=>{ if(typeof queueSave==='function') queueSave(); });
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.35;
+renderer.shadowMap.enabled=false;
+renderer.shadowMap.type=THREE.BasicShadowMap;
+renderer.info.autoReset=true;
+
+// Global environment map
+const pmrem=new THREE.PMREMGenerator(renderer);
+pmrem.compileEquirectangularShader();
+const roomEnv=new RoomEnvironment();
+const envRT=pmrem.fromScene(roomEnv,0.04);
+scene.environment=envRT.texture;
+roomEnv.dispose();
+
+/* ---------- Shader mirrors (sky + soft ground + fog) ----------
+   ZERO extra render passes — same sky math as the real sky dome.
+   No Reflector, no render-target, no pixelation, no Man leak, no lag.
+*/
+let mirrorReflectors = [];
+
+function isMirrorName(name){
+  if(!name) return false;
+  const n = String(name);
+  return n === "Mirrors" || /mirror/i.test(n);
+}
+
+/** Shared atmosphere uniforms for every mirror (linked in applyEnvironment). */
+const mirrorSharedUniforms = {
+  day: { value: 0.62 },
+  sunDir: { value: new THREE.Vector3(0, 0.8, 0) },
+  moonDir: { value: new THREE.Vector3(0, -0.8, 0) },
+  sat: { value: 0.65 },
+  groundColor: { value: new THREE.Color(0x7a8a6e) },
+  fogColor: { value: new THREE.Color(0x90a8c0) },
+  fogDensity: { value: 0.0002 },
+  cameraPos: { value: new THREE.Vector3() }
+};
+
+function createMirrorMaterial(){
+  return new THREE.ShaderMaterial({
+    side: THREE.DoubleSide,
+    transparent: false,
+    depthWrite: true,
+    uniforms: {
+      day: mirrorSharedUniforms.day,
+      sunDir: mirrorSharedUniforms.sunDir,
+      moonDir: mirrorSharedUniforms.moonDir,
+      sat: mirrorSharedUniforms.sat,
+      groundColor: mirrorSharedUniforms.groundColor,
+      fogColor: mirrorSharedUniforms.fogColor,
+      fogDensity: mirrorSharedUniforms.fogDensity,
+      cameraPos: mirrorSharedUniforms.cameraPos
+    },
+    vertexShader: `
+      varying vec3 vWorldPos;
+      varying vec3 vWorldNormal;
+      void main(){
+        vec4 wp = modelMatrix * vec4(position, 1.0);
+        vWorldPos = wp.xyz;
+        // Use continuous (non-unit) normal so non-uniform scale stays correct
+        vWorldNormal = normalize(mat3(modelMatrix) * normal);
+        gl_Position = projectionMatrix * viewMatrix * wp;
+      }
+    `,
+    fragmentShader: `
+      uniform float day;
+      uniform vec3 sunDir;
+      uniform vec3 moonDir;
+      uniform float sat;
+      uniform vec3 groundColor;
+      uniform vec3 fogColor;
+      uniform float fogDensity;
+      uniform vec3 cameraPos;
+      varying vec3 vWorldPos;
+      varying vec3 vWorldNormal;
+
+      // Same atmosphere evaluation as the main sky dome (true colors)
+      vec3 evalSky(vec3 view){
+        view = normalize(view);
+        float elevView = clamp(view.y, -0.15, 1.0);
+        float h = smoothstep(-0.05, 1.0, elevView);
+        float elev = sunDir.y;
+
+        float daylight = smoothstep(-0.32, 0.30, elev);
+        float nightAmt = 1.0 - daylight;
+        float golden = 1.0 - smoothstep(0.0, 0.42, abs(elev));
+        golden = pow(golden, 0.75) * clamp(daylight + 0.22, 0.0, 1.0);
+        float blueHour = (1.0 - smoothstep(0.0, 0.26, abs(elev + 0.10))) * (1.0 - daylight * 0.45);
+
+        vec3 nightHorizon = vec3(0.015, 0.025, 0.065);
+        vec3 nightMid     = vec3(0.008, 0.014, 0.045);
+        vec3 nightZenith  = vec3(0.002, 0.006, 0.028);
+
+        vec3 dayHorizon   = vec3(0.78, 0.88, 0.98);
+        vec3 dayMid       = vec3(0.42, 0.68, 0.95);
+        vec3 dayZenith    = vec3(0.08, 0.28, 0.78);
+
+        vec3 setHorizon   = vec3(1.00, 0.22, 0.04);
+        vec3 setLow       = vec3(1.00, 0.48, 0.12);
+        vec3 setMid       = vec3(0.95, 0.38, 0.55);
+        vec3 setHigh      = vec3(0.35, 0.18, 0.55);
+
+        vec3 blueHorizon  = vec3(0.28, 0.38, 0.72);
+        vec3 blueMid      = vec3(0.10, 0.16, 0.40);
+        vec3 blueZenith   = vec3(0.03, 0.05, 0.16);
+
+        vec3 nightCol = mix(nightHorizon, nightMid, smoothstep(0.0, 0.42, h));
+        nightCol = mix(nightCol, nightZenith, smoothstep(0.32, 1.0, h));
+
+        vec3 dayCol = mix(dayHorizon, dayMid, smoothstep(0.0, 0.38, h));
+        dayCol = mix(dayCol, dayZenith, smoothstep(0.28, 1.0, h));
+
+        vec3 setCol = mix(setHorizon, setLow, smoothstep(0.0, 0.16, h));
+        setCol = mix(setCol, setMid, smoothstep(0.10, 0.40, h));
+        setCol = mix(setCol, setHigh, smoothstep(0.32, 0.92, h));
+
+        vec3 blueCol = mix(blueHorizon, blueMid, smoothstep(0.0, 0.38, h));
+        blueCol = mix(blueCol, blueZenith, smoothstep(0.28, 1.0, h));
+
+        vec3 skyDay = mix(dayCol, setCol, clamp(golden * 1.40, 0.0, 1.0));
+        vec3 skyTrans = mix(skyDay, blueCol, clamp(blueHour * 0.95, 0.0, 1.0));
+        vec3 col = mix(nightCol, skyTrans, clamp(daylight + blueHour * 0.40, 0.0, 1.0));
+
+        float lum = dot(col, vec3(0.299, 0.587, 0.114));
+        col = mix(vec3(lum), col, sat);
+
+        float horizonBand = exp(-max(view.y, 0.0) * 3.8);
+        float scatterStr = (0.16 + 0.62 * golden + 0.22 * blueHour) * horizonBand;
+        vec3 scatterColor = mix(
+          vec3(0.58, 0.74, 0.98),
+          mix(vec3(1.0, 0.42, 0.14), vec3(0.85, 0.32, 0.52), blueHour),
+          clamp(golden + blueHour, 0.0, 1.0)
+        );
+        col += scatterColor * scatterStr * (0.45 + 0.55 * daylight);
+
+        // Sun glare (same as main sky — keeps disc + bloom readable in mirror)
+        vec3 sDir = normalize(sunDir);
+        float sunDot = max(dot(view, sDir), 0.0);
+        float sunCore = pow(sunDot, 1400.0) * 4.5;
+        float sunCorona = pow(sunDot, 120.0) * 1.15;
+        float sunGlow = pow(sunDot, 28.0) * 0.55;
+        float sunBloom = pow(sunDot, 5.5) * 0.28 * (0.30 + 0.70 * daylight);
+        float warmBloom = pow(sunDot, 1.8) * golden * 0.55;
+        float sunVeil = pow(sunDot, 1.15) * golden * 0.18;
+        vec3 sunColor = mix(vec3(1.0, 0.98, 0.92), vec3(1.0, 0.52, 0.18), golden);
+        vec3 glareColor = mix(vec3(1.0, 0.90, 0.70), vec3(1.0, 0.38, 0.12), golden);
+        col += sunColor * (sunCore + sunCorona + sunGlow);
+        col += glareColor * (sunBloom + warmBloom + sunVeil);
+
+        float moonDot = max(dot(view, normalize(moonDir)), 0.0);
+        float moonCore = pow(moonDot, 600.0) * 0.85;
+        float moonGlow = pow(moonDot, 16.0) * 0.12;
+        col += vec3(0.58, 0.68, 0.98) * (moonCore + moonGlow) * nightAmt;
+
+        col *= (0.90 + 0.10 * smoothstep(0.0, 0.55, h));
+        return max(col, vec3(0.0));
+      }
+
+      void main(){
+        vec3 N = normalize(vWorldNormal);
+        vec3 V = normalize(cameraPos - vWorldPos);
+        // Flip normal if we are looking at the back face
+        if(dot(N, V) < 0.0) N = -N;
+
+        // Perfect clear mirror ray
+        vec3 R = reflect(-V, N);
+
+        // Sky: full original atmosphere (same as outside the mirror)
+        vec3 skyCol = evalSky(R);
+
+        float elev = sunDir.y;
+        float daylight = smoothstep(-0.32, 0.30, elev);
+
+        // Ground below horizon — tight contact line matching the real world horizon
+        // (was too wide before → thick wrong band inside mirrors)
+        float downAmt = smoothstep(0.02, -0.025, R.y);
+        vec3 gnd = groundColor * (0.70 + 0.55 * daylight);
+
+        vec3 col = mix(skyCol, gnd, downAmt);
+
+        // Thin horizon haze only — same feel as outdoor sky↔ground contact
+        float contact = exp(-abs(R.y) * 22.0);
+        float fogAmt = contact * clamp(fogDensity * 55.0, 0.0, 0.05);
+        col = mix(col, fogColor, fogAmt);
+
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  });
+}
+
+function prepareHomeMirrors(obj){
+  if(!obj) return;
+  obj.traverse(c=>{
+    if(!c.isMesh || c.userData.__professionalMirror) return;
+    if(!isMirrorName(c.name)) return;
+
+    // Keep original mesh + transform — only swap material (stable, no geometry bugs)
+    const oldMat = c.material;
+    c.material = createMirrorMaterial();
+    c.userData = {
+      ...(c.userData || {}),
+      isHomeMirror: true,
+      __professionalMirror: true,
+      solid: false
+    };
+    c.frustumCulled = true;
+    c.renderOrder = 2;
+    if(oldMat){
+      const mats = Array.isArray(oldMat) ? oldMat : [oldMat];
+      for(const m of mats){ if(m && m.dispose) try{ m.dispose(); }catch(_){} }
+    }
+    mirrorReflectors.push(c);
+  });
+}
+
+function updateLightMirrors(force=false){
+  if(!mirrorReflectors.length) return;
+  // Only camera position changes per frame — sky uniforms updated in applyEnvironment
+  mirrorSharedUniforms.cameraPos.value.copy(camera.position);
+}
+
+function cleanupMirrorsForObject(obj){
+  if(!obj) return;
+  mirrorReflectors = mirrorReflectors.filter(r=>{
+    let belongs = false;
+    try{
+      belongs = obj === r || (obj.getObjectById && obj.getObjectById(r.id));
+    }catch(_){}
+    if(belongs){
+      if(r.material?.dispose) r.material.dispose();
+      return false;
+    }
+    return true;
+  });
+}
+
+function resizeMirrorReflectors(){
+  // Shader mirrors — nothing to resize
+}
+
+function disposeMirrorReflector(child){
+  if(!child) return;
+  const i = mirrorReflectors.indexOf(child);
+  if(i >= 0) mirrorReflectors.splice(i, 1);
+  if(child.material?.dispose) child.material.dispose();
+}
+
+const hemi=new THREE.HemisphereLight(0xcfe7ff,0x56604f,1);
+const fillLight=new THREE.DirectionalLight(0x7898bd,.42);
+fillLight.position.set(-45,28,-45);
+const sunLight=new THREE.DirectionalLight(0xfff1d4,2);
+sunLight.castShadow=false;
+sunLight.shadow.mapSize.set(innerWidth>900?2048:1024,innerWidth>900?2048:1024);
+sunLight.shadow.bias=-.00008;
+sunLight.shadow.normalBias=.018;
+sunLight.shadow.camera.near=.2;
+sunLight.shadow.camera.far=8000;
+sunLight.shadow.camera.left=-2500;
+sunLight.shadow.camera.right=2500;
+sunLight.shadow.camera.top=2500;
+sunLight.shadow.camera.bottom=-2500;
+scene.add(hemi,fillLight,sunLight);
+
+const root=new THREE.Group();
+scene.add(root);
+
+let worldSize=5000;
+let groundY=0;
+let selected=null;
+let paused=false;
+let running=false;
+
+const move={x:0,z:0};
+const keys={};
+
+let player=null;
+let playerVisual=null;
+let mixer=null;
+let actions={};
+let currentAction=null;
+let velocityY=0;
+let grounded=true;
+
+const objects=[];
+const colliders=[];
+const collisionMeshes=[];
+
+const env={
+  day:.62,
+  angle:3.8,
+  height:.42,
+  skySat:.65,
+  fog:.35,
+  light:1.15,
+  charFront:0.7,
+  charBack:0.65,
+  charFill:0.85,
+  groundColor:'#7a8a6e',
+  groundBrightness:1.0
+};
+
+/* ---------- Camera system (stable + feet-proof) ---------- */
+let cameraMode = 'close'; // 'close' | 'normal'
+const cameraState = {
+  yaw: Math.PI,
+  pitch: 0.32,
+  idealDistance: 5.5,
+  currentDistance: 5.5,
+  minDistance: 2.0,
+  sensitivity: 0.0045,
+  userZoomClose: 0,
+  userZoomNormal: 0
+};
+const cameraTargetPos = new THREE.Vector3();
+const cameraSmoothPos = new THREE.Vector3();
+const cameraRaycaster = new THREE.Raycaster();
+const cameraUp = new THREE.Vector3(0, 1, 0);
+const _camDir = new THREE.Vector3();
+const _camRayDir = new THREE.Vector3();
+const _camFinal = new THREE.Vector3();
+const _camLook = new THREE.Vector3();
+const _bbox = new THREE.Box3();
+let _camInitialized = false;
+let _cachedCharH = 1.8;
+
+function isPlayerObject(obj){
+  let p = obj;
+  while(p){ if(p === player) return true; p = p.parent; }
+  return false;
+}
+
+function isVehicleObject(obj, vehicle){
+  if(!vehicle || !obj) return false;
+  let p = obj;
+  while(p){ if(p === vehicle) return true; p = p.parent; }
+  return false;
+}
+
+function getScaleFactor(obj){
+  if(!obj) return 1;
+  return Math.max(obj.scale.x, obj.scale.y, obj.scale.z, 0.001);
+}
+
+/** Real world height of the active target (bbox) — source of truth for look height */
+function measureTargetHeight(target){
+  if(!target) return 1.8;
+  target.updateMatrixWorld(true);
+  _bbox.setFromObject(target);
+  const h = _bbox.max.y - _bbox.min.y;
+  if(h > 0.05) return h;
+  return _cachedCharH > 0.05 ? _cachedCharH : 1.8;
+}
+
+function updateFollowCamera(dt){
+  const target = (driving && currentVehicle) ? currentVehicle : player;
+  if(!target) { orbitControls.update(); return; }
+  target.updateMatrixWorld(true);
+  _bbox.setFromObject(target);
+  const h=Math.max(.8,_bbox.max.y-_bbox.min.y || _cachedCharH || 1.8);
+  if(!(driving && currentVehicle)) _cachedCharH=h;
+  const lookH=(driving && currentVehicle)?h*.55:h*.72;
+  _camLook.set(target.position.x,target.position.y+Math.max(.45,lookH),target.position.z);
+  if(!orbitControls.userData) orbitControls.userData = {};
+  if(!orbitControls.userData.followInitialized){
+    orbitControls.target.copy(_camLook);
+    const dist=(cameraMode==='close'?Math.max(2.5,h*2.8):Math.max(5.5,h*4.6));
+    camera.position.set(_camLook.x,_camLook.y+Math.max(1.1,h*.65),_camLook.z+dist);
+    camera.lookAt(_camLook);
+    orbitControls.userData.followInitialized=true;
+    orbitControls.update();
+  }else{
+    const oldTarget=orbitControls.target.clone();
+    const alpha=1-Math.exp(-8*Math.min(dt,.05));
+    orbitControls.target.lerp(_camLook,alpha);
+    const shift=orbitControls.target.clone().sub(oldTarget);
+    camera.position.add(shift);
+    orbitControls.update();
+  }
+  // Keep the camera from entering the ground or solid world meshes, without changing its orbit logic.
+  const delta=camera.position.clone().sub(orbitControls.target),distance=delta.length();
+  if(distance>.01){
+    _camRayDir.copy(delta).normalize();
+    cameraRaycaster.set(orbitControls.target,_camRayDir);
+    cameraRaycaster.near=.12; cameraRaycaster.far=distance;
+    const hits=cameraRaycaster.intersectObjects(collisionMeshes,true).filter(hit=>{
+      if(hit.distance<.35)return false;
+      if(isPlayerObject(hit.object))return false;
+      if(driving&&currentVehicle&&isVehicleObject(hit.object,currentVehicle))return false;
+      return !(hit.face&&hit.face.normal&&hit.face.normal.y>.7);
+    });
+    if(hits.length){const safe=Math.max(orbitControls.minDistance,hits[0].distance-.28);if(safe<distance)camera.position.copy(orbitControls.target).addScaledVector(_camRayDir,safe);}
+  }
+  if(camera.position.y<groundY+.25)camera.position.y=groundY+.25;
+}
+
+function say(t){
+  $("status").textContent=t;
+  clearTimeout(say.t);
+  say.t=setTimeout(()=>$("status").textContent="World ready",2600);
+}
+function toast(t){
+  $("toast").textContent=t;
+  $("toast").classList.add("show");
+  clearTimeout(toast.t);
+  toast.t=setTimeout(()=>$("toast").classList.remove("show"),1800);
+}
+function mat(c,r=.78,m=0){
+  return new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+}
+
+/* ---------- Real sky: sun + moon + stars + gradient ---------- */
+const skyUniforms={
+  day:{value:env.day},
+  sunDir:{value:new THREE.Vector3(0,.8,0)},
+  moonDir:{value:new THREE.Vector3(0,-.8,0)},
+  sat:{value:env.skySat}
+};
+const sky=new THREE.Mesh(
+  new THREE.SphereGeometry(4800, 96, 48),
+  new THREE.ShaderMaterial({
+    side:THREE.BackSide,
+    depthWrite:false,
+    uniforms:skyUniforms,
+    vertexShader:`
+      varying vec3 vWorld;
+      void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}
+    `,
+    fragmentShader:`
+      uniform float day; uniform vec3 sunDir; uniform vec3 moonDir; uniform float sat;
+      varying vec3 vWorld;
+      void main(){
+        vec3 view = normalize(vWorld);
+        // height factor: 0 horizon, 1 zenith (smooth continuous gradient)
+        float elevView = clamp(view.y, -0.15, 1.0);
+        float h = smoothstep(-0.05, 1.0, elevView);
+        float elev = sunDir.y;
+
+        float daylight = smoothstep(-0.32, 0.30, elev);
+        float nightAmt = 1.0 - daylight;
+        float golden = 1.0 - smoothstep(0.0, 0.42, abs(elev));
+        golden = pow(golden, 0.75) * clamp(daylight + 0.22, 0.0, 1.0);
+        float blueHour = (1.0 - smoothstep(0.0, 0.26, abs(elev + 0.10))) * (1.0 - daylight * 0.45);
+
+        // ---- Professional continuous sky palette ----
+        vec3 nightHorizon = vec3(0.015, 0.025, 0.065);
+        vec3 nightMid     = vec3(0.008, 0.014, 0.045);
+        vec3 nightZenith  = vec3(0.002, 0.006, 0.028);
+
+        vec3 dayHorizon   = vec3(0.78, 0.88, 0.98);
+        vec3 dayMid       = vec3(0.42, 0.68, 0.95);
+        vec3 dayZenith    = vec3(0.08, 0.28, 0.78);
+
+        vec3 setHorizon   = vec3(1.00, 0.22, 0.04);
+        vec3 setLow       = vec3(1.00, 0.48, 0.12);
+        vec3 setMid       = vec3(0.95, 0.38, 0.55);
+        vec3 setHigh      = vec3(0.35, 0.18, 0.55);
+
+        vec3 blueHorizon  = vec3(0.28, 0.38, 0.72);
+        vec3 blueMid      = vec3(0.10, 0.16, 0.40);
+        vec3 blueZenith   = vec3(0.03, 0.05, 0.16);
+
+        // Smooth 3-stop vertical gradients (no banding)
+        vec3 nightCol = mix(nightHorizon, nightMid, smoothstep(0.0, 0.42, h));
+        nightCol = mix(nightCol, nightZenith, smoothstep(0.32, 1.0, h));
+
+        vec3 dayCol = mix(dayHorizon, dayMid, smoothstep(0.0, 0.38, h));
+        dayCol = mix(dayCol, dayZenith, smoothstep(0.28, 1.0, h));
+
+        vec3 setCol = mix(setHorizon, setLow, smoothstep(0.0, 0.16, h));
+        setCol = mix(setCol, setMid, smoothstep(0.10, 0.40, h));
+        setCol = mix(setCol, setHigh, smoothstep(0.32, 0.92, h));
+
+        vec3 blueCol = mix(blueHorizon, blueMid, smoothstep(0.0, 0.38, h));
+        blueCol = mix(blueCol, blueZenith, smoothstep(0.28, 1.0, h));
+
+        vec3 skyDay = mix(dayCol, setCol, clamp(golden * 1.40, 0.0, 1.0));
+        vec3 skyTrans = mix(skyDay, blueCol, clamp(blueHour * 0.95, 0.0, 1.0));
+        vec3 col = mix(nightCol, skyTrans, clamp(daylight + blueHour * 0.40, 0.0, 1.0));
+
+        float lum = dot(col, vec3(0.299, 0.587, 0.114));
+        col = mix(vec3(lum), col, sat);
+
+        // Atmospheric scattering / horizon haze
+        float horizonBand = exp(-max(view.y, 0.0) * 3.8);
+        float scatterStr = (0.16 + 0.62 * golden + 0.22 * blueHour) * horizonBand;
+        vec3 scatterColor = mix(
+          vec3(0.58, 0.74, 0.98),
+          mix(vec3(1.0, 0.42, 0.14), vec3(0.85, 0.32, 0.52), blueHour),
+          clamp(golden + blueHour, 0.0, 1.0)
+        );
+        col += scatterColor * scatterStr * (0.45 + 0.55 * daylight);
+
+        // ---- Realistic sun glare (core + corona + atmospheric bloom) ----
+        vec3 sDir = normalize(sunDir);
+        float sunDot = max(dot(view, sDir), 0.0);
+        // Tiny bright core (disc)
+        float sunCore = pow(sunDot, 1400.0) * 4.5;
+        // Tight corona
+        float sunCorona = pow(sunDot, 120.0) * 1.15;
+        // Soft atmospheric glare / bloom (natural sun haze)
+        float sunGlow = pow(sunDot, 28.0) * 0.55;
+        float sunBloom = pow(sunDot, 5.5) * 0.28 * (0.30 + 0.70 * daylight);
+        float warmBloom = pow(sunDot, 1.8) * golden * 0.55;
+        // Extra wide veil for golden hour
+        float sunVeil = pow(sunDot, 1.15) * golden * 0.18;
+
+        vec3 sunColor = mix(vec3(1.0, 0.98, 0.92), vec3(1.0, 0.52, 0.18), golden);
+        vec3 glareColor = mix(vec3(1.0, 0.90, 0.70), vec3(1.0, 0.38, 0.12), golden);
+
+        col += sunColor * (sunCore + sunCorona + sunGlow);
+        col += glareColor * (sunBloom + warmBloom + sunVeil);
+
+        // Moon
+        float moonDot = max(dot(view, normalize(moonDir)), 0.0);
+        float moonCore = pow(moonDot, 600.0) * 0.85;
+        float moonGlow = pow(moonDot, 16.0) * 0.12;
+        col += vec3(0.58, 0.68, 0.98) * (moonCore + moonGlow) * nightAmt;
+
+        col *= (0.90 + 0.10 * smoothstep(0.0, 0.55, h));
+        // Soft tone so reflections stay bright in mirrors
+        col = max(col, vec3(0.0));
+        gl_FragColor = vec4(col, 1.0);
+      }
+    `
+  })
+);
+scene.add(sky);
+
+/* ---------- lightweight dynamic cloud layer ---------- */
+const cloudUniforms={uTime:{value:0},uSunPosition:{value:new THREE.Vector3()}};
+const cloud=new THREE.Mesh(new THREE.SphereGeometry(4850,48,28),new THREE.ShaderMaterial({
+  side:THREE.BackSide,transparent:true,depthWrite:false,uniforms:cloudUniforms,
+  vertexShader:`varying vec3 vWorld;void main(){vWorld=normalize(position);gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}`,
+  fragmentShader:`
+    uniform float uTime; uniform vec3 uSunPosition; varying vec3 vWorld;
+    float hash(vec3 p){return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453);}
+    float noise(vec3 p){
+      vec3 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+      return mix(mix(mix(hash(i),hash(i+vec3(1,0,0)),f.x),mix(hash(i+vec3(0,1,0)),hash(i+vec3(1,1,0)),f.x),f.y),
+      mix(mix(hash(i+vec3(0,0,1)),hash(i+vec3(1,0,1)),f.x),mix(hash(i+vec3(0,1,1)),hash(i+vec3(1,1,1)),f.x),f.y),f.z);
+    }
+    void main(){
+      // denser, multi-scale clouds
+      vec3 p = vWorld * 2.55 + vec3(uTime * 0.014, 0.0, uTime * 0.009);
+      float n = noise(p) + 0.55 * noise(p * 2.1) + 0.28 * noise(p * 4.2) + 0.12 * noise(p * 8.0);
+      float d = smoothstep(0.72, 1.32, n);          // lower threshold = more clouds
+      float horizon = smoothstep(0.015, 0.32, vWorld.y);
+      if (d < 0.02) discard;
+
+      float sun = max(dot(normalize(vWorld), normalize(uSunPosition)), 0.0);
+      float elev = uSunPosition.y;
+      float golden = 1.0 - smoothstep(-0.15, 0.25, abs(elev - 0.05));
+
+      // ALWAYS white / light gray base (never dark or blue)
+      vec3 whiteCloud = vec3(0.96, 0.97, 0.99);
+      vec3 softGray   = vec3(0.82, 0.85, 0.90);
+      vec3 c = mix(softGray, whiteCloud, clamp(d * 1.4, 0.0, 1.0));
+
+      // gentle warm tint only near sun during golden hour (still stays light)
+      vec3 warm = vec3(1.0, 0.88, 0.72);
+      c = mix(c, warm, pow(sun, 5.0) * golden * 0.45);
+      c += vec3(1.0, 0.7, 0.4) * pow(sun, 12.0) * golden * 0.25;
+
+      // keep overall brightness high so they never look black
+      c = max(c, vec3(0.75));
+
+      float alpha = d * 0.72 * horizon;
+      gl_FragColor = vec4(c, alpha);
+    }`
+}));
+scene.add(cloud);
+
+const sunDisc=new THREE.Mesh(
+  new THREE.SphereGeometry(28, 24, 18),
+  new THREE.MeshBasicMaterial({color:0xfff4c7, toneMapped:false})
+);
+sunDisc.renderOrder=2;
+scene.add(sunDisc);
+
+const stars=new THREE.Points(
+  new THREE.BufferGeometry(),
+  new THREE.PointsMaterial({color:0xffffff,size:.72,sizeAttenuation:true,transparent:true,opacity:0,depthWrite:false})
+);
+{
+  const pos=[];
+  for(let i=0;i<1400;i++){
+    const a=Math.random()*Math.PI*2;
+    const y=Math.random()*.92+.08;
+    const r=Math.sqrt(1-y*y);
+    pos.push(Math.cos(a)*r*4200,y*4200,Math.sin(a)*r*4200);
+  }
+  stars.geometry.setAttribute("position",new THREE.Float32BufferAttribute(pos,3));
+}
+scene.add(stars);
+
+function applyEnvironment(){
+  const t=env.day;
+  const elevation=Math.sin((t-.25)*Math.PI*2);
+  const az=env.angle;
+  const cosE=Math.cos(Math.asin(elevation));
+  const dir=new THREE.Vector3(Math.cos(az)*cosE,elevation,Math.sin(az)*cosE).normalize();
+  const skySun=dir.clone().multiplyScalar(2200);
+  
+  const moonDir=dir.clone().multiplyScalar(-1);
+
+  skyUniforms.day.value=env.day;
+  skyUniforms.sunDir.value.copy(dir);
+  skyUniforms.moonDir.value.copy(moonDir);
+  skyUniforms.sat.value=env.skySat;
+  cloudUniforms.uSunPosition.value.copy(dir);
+  cloudUniforms.uTime.value=performance.now()*.001;
+
+  // Keep shader mirrors in exact sync with the real sky / fog / ground
+  mirrorSharedUniforms.day.value = env.day;
+  mirrorSharedUniforms.sunDir.value.copy(dir);
+  mirrorSharedUniforms.moonDir.value.copy(moonDir);
+  mirrorSharedUniforms.sat.value = env.skySat;
+  if(typeof groundMat !== "undefined" && groundMat && groundMat.color){
+    mirrorSharedUniforms.groundColor.value.copy(groundMat.color);
+  } else if(env.groundColor){
+    mirrorSharedUniforms.groundColor.value.set(env.groundColor);
+  }
+
+  sunLight.position.copy(dir).multiplyScalar(2200);
+  sunDisc.position.copy(dir).multiplyScalar(2100);
+  // Prolonged, smooth daylight transition (matches sky shader)
+  const daylight = THREE.MathUtils.smoothstep(elevation, -0.28, 0.32);
+  const nightAmt = 1 - daylight;
+  const golden = 1 - THREE.MathUtils.smoothstep(Math.abs(elevation - 0.05), 0.0, 0.22);
+
+  sunDisc.visible = elevation > -0.12;
+  // warm sun color during golden hour
+  const sunWarm = THREE.MathUtils.clamp(golden, 0, 1);
+  sunDisc.material.color.setRGB(1.0, 0.95 - sunWarm * 0.35, 0.72 - sunWarm * 0.45);
+
+  // ---- World lights only (sun / hemi / fill) — light ground + all GLB objects ----
+  // Balanced so imported models keep rich albedo without wash-out.
+  // Character (Man) has its OWN local lights controlled by charFront / charBack / charFill.
+  const worldMul = env.light;
+
+  // Sun: warm key, intensity tuned for PBR albedo (not too hot)
+  sunLight.color.setRGB(1.0, 0.97 - sunWarm * 0.22, 0.88 - sunWarm * 0.38);
+  sunLight.intensity = (0.08 + 1.85 * worldMul) * daylight;
+
+  // Fill: cool opposite, soft
+  fillLight.color.setRGB(0.72, 0.82, 0.95);
+  fillLight.intensity = (0.14 + 0.48 * daylight) * worldMul;
+  fillLight.position.set(-dir.x * 70, 38, -dir.z * 70);
+
+  // Hemisphere: sky + ground bounce — rich but not overpowering
+  hemi.intensity = (0.20 + 0.78 * worldMul) * (0.38 + 0.62 * daylight);
+  hemi.color.setHSL(0.58, 0.28 + 0.08 * daylight, 0.55 + 0.28 * daylight);
+  hemi.groundColor.setHSL(0.22, 0.22, 0.20 + 0.16 * daylight);
+
+  if(nightAmt > 0.05){
+    // Soft moonlight fill at night (cool blue) — still world lights only
+    fillLight.intensity += 0.18 * nightAmt * worldMul;
+    hemi.intensity += 0.14 * nightAmt * worldMul;
+    fillLight.color.lerp(new THREE.Color(0.45, 0.55, 0.85), nightAmt * 0.55);
+  }
+
+  stars.material.opacity = THREE.MathUtils.clamp((-.02 - elevation) * 2.1, 0, .96);
+
+  // Fog color adapts to sky phase (day / golden / night)
+  const fogCol = new THREE.Color();
+  if(daylight > 0.55){
+    fogCol.setRGB(0.65, 0.76, 0.92);
+  } else if(daylight > 0.12 || golden > 0.3){
+    fogCol.setRGB(0.92, 0.48 + 0.2 * golden, 0.28 + 0.12 * daylight);
+  } else {
+    fogCol.setRGB(0.05, 0.07, 0.13);
+  }
+  // Large world (5000): lighter exponential fog so horizon stays visible
+  if(!scene.fog) scene.fog = new THREE.FogExp2(fogCol.getHex(), 0.00015);
+  scene.fog.color.copy(fogCol);
+  // slider 0..1 → density ~0.00008 .. 0.00055 (works with worldSize 5000)
+  scene.fog.density = 0.00008 + env.fog * 0.00047;
+  mirrorSharedUniforms.fogColor.value.copy(fogCol);
+  mirrorSharedUniforms.fogDensity.value = scene.fog.density;
+
+  sunLight.shadow.camera.updateProjectionMatrix();
+
+  // ---- Man local lights ONLY (completely independent of World light slider) ----
+  // Controlled exclusively by charFront / charBack / charFill.
+  // These lights live on the player group and never affect Home / Car / Girl / imports.
+  if(player){
+    const manKey  = player.getObjectByName("ManKey");
+    const manFillL = player.getObjectByName("ManFill");
+    const manRim  = player.getObjectByName("ManRim");
+    const manSide = player.getObjectByName("ManSide");
+    if(manKey)  manKey.intensity  = env.charFront * (0.55 + 0.45 * daylight);
+    if(manRim)  manRim.intensity  = env.charBack  * (0.50 + 0.50 * Math.max(nightAmt, 0.35));
+    if(manFillL) manFillL.intensity = env.charFill * (0.60 + 0.40 * daylight);
+    if(manSide) manSide.intensity = env.charFront * 0.35 * (0.50 + 0.50 * daylight);
+  }
+
+  if(typeof updateLightMirrors === "function") updateLightMirrors(true);
+}
+
+let ground;
+const groundMat=new THREE.MeshBasicMaterial({color:0x68745f,side:THREE.DoubleSide});
+function buildSimpleGround(){
+  if(ground)scene.remove(ground);
+  ground=new THREE.Mesh(new THREE.PlaneGeometry(worldSize,worldSize),groundMat);
+  ground.rotation.x=-Math.PI/2;
+  ground.position.y=groundY;
+  ground.name="SimpleGround";
+  ground.userData.solid=true;
+  scene.add(ground);
+}
+buildSimpleGround();
+refreshColliders();
+applyEnvironment();
+
+const assetLoader=new GLTFLoader();
+const assetCache={};
+
+async function loadAssetGLB(path,type,name,opts={}){
+  try{
+    let gltf=assetCache[path];
+    if(!gltf){
+      gltf=await assetLoader.loadAsync(path);
+      assetCache[path]=gltf;
+    }
+    const o=gltf.scene.clone(true);
+    o.traverse(c=>{
+      if(c.isMesh&&c.material){
+        c.material=Array.isArray(c.material)?c.material.map(m=>m.clone()):c.material.clone();
+      }
+    });
+    o.userData={
+      type,
+      solid:true,
+      vehicle:type==="Car",
+      imported:true,
+      assetPath:path
+    };
+    o.name=name||type;
+    optimizeImportedModel(o);
+    // Mirror meshes are detected by node name in every imported GLB/GLTF,
+    // not only assets whose filename is Home.glb.
+    prepareHomeMirrors(o);
+    if(opts.skipPlace){
+      root.add(o);
+      objects.push(o);
+      return o;
+    }
+    place(o,o.name);
+    say(type+" loaded");
+    toast(type+" added");
+    return o;
+  }catch(e){
+    console.error(e);
+    toast(type+" failed — put "+path+" next to the HTML");
+    say("Missing "+path);
+    return null;
+  }
+}
+
+function createPlaceholder(type){
+  const g=new THREE.Group();
+  g.userData={type,solid:true,vehicle:type==="Car"};
+  g.name=type+" (missing GLB)";
+  const mesh=new THREE.Mesh(
+    type==="Car"?new THREE.BoxGeometry(2.2,0.9,4.2):
+    type==="Home"?new THREE.BoxGeometry(4,2.5,4):
+    new THREE.CapsuleGeometry(0.3,1,6,10),
+    mat(0x666666,0.8)
+  );
+  mesh.position.y=type==="Home"?1.25:type==="Car"?0.45:0.9;
+  mesh.castShadow=false;mesh.receiveShadow=false;
+  g.add(mesh);
+  return g;
+}
+
+function fitToGround(o){
+  const b=new THREE.Box3().setFromObject(o);
+  o.position.y+=groundY-b.min.y;
+}
+
+function disposeObject(o){
+  if(!o)return;
+  if(typeof cleanupMirrorsForObject === "function") cleanupMirrorsForObject(o);
+  o.traverse(child=>{
+    if(child.userData && child.userData.__professionalMirror){
+      if(typeof disposeMirrorReflector === "function") disposeMirrorReflector(child);
+      return;
+    }
+    if(child.isMesh){
+      if(child.geometry)child.geometry.dispose();
+      const mats=Array.isArray(child.material)?child.material:[child.material];
+      for(const m of mats){
+        if(!m)continue;
+        for(const key of Object.keys(m)){
+          if(m[key]&&m[key].isTexture)m[key].dispose();
+        }
+        if(m.dispose)m.dispose();
+      }
+    }
+    if(child.userData&&child.userData._blobUrls){
+      child.userData._blobUrls.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});
+    }
+  });
+  if(o.parent)o.parent.remove(o);
+}
+
+/**
+ * Preserve original GLB colors (Home / Car / Girl / imported).
+ * COMPLETELY SEPARATE from World/Man lighting controls:
+ *  - No scene.environment / IBL (envMapIntensity = 0)
+ *  - No character local lights (ManKey / ManRim / …)
+ *  - Only global sun + hemi + fill illuminate these models
+ *  - Albedo / maps kept true to the file, no wash-out
+ */
+function optimizeImportedModel(rootObj){
+  rootObj.traverse(x=>{
+    // Disable any embedded lights that came with the GLB
+    // (so World/Man sliders never fight with author lights)
+    if(x.isLight){
+      x.intensity = 0;
+      x.visible = false;
+      return;
+    }
+    if(!x.isMesh) return;
+    x.frustumCulled = true;
+    x.castShadow = false;
+    x.receiveShadow = false;
+    if(x.geometry){
+      x.geometry.computeBoundingSphere();
+    }
+    const mats = Array.isArray(x.material) ? x.material : (x.material ? [x.material] : []);
+    for(const m of mats){
+      if(!m) continue;
+
+      // ---- Fully detach from scene.environment / IBL ----
+      if("envMapIntensity" in m) m.envMapIntensity = 0;
+      if("envMap" in m) m.envMap = null;
+      if(m.userData) m.userData.envMap = null;
+
+      // ---- Color maps: correct color space so albedo stays vibrant ----
+      const colorMaps = ["map", "emissiveMap", "specularMap"];
+      for(const key of colorMaps){
+        const tex = m[key];
+        if(tex && tex.isTexture){
+          tex.colorSpace = THREE.SRGBColorSpace;
+          tex.needsUpdate = true;
+        }
+      }
+      // Non-color maps stay linear
+      const linearMaps = ["normalMap", "roughnessMap", "metalnessMap", "aoMap", "bumpMap", "displacementMap"];
+      for(const key of linearMaps){
+        const tex = m[key];
+        if(tex && tex.isTexture){
+          tex.colorSpace = THREE.NoColorSpace;
+          tex.needsUpdate = true;
+        }
+      }
+
+      // Soften extreme PBR values that cause sun-glare wash under world lights
+      if("metalness" in m && m.metalness > 0.72) m.metalness = Math.min(m.metalness, 0.65);
+      if("roughness" in m && m.roughness < 0.18) m.roughness = 0.22;
+      if("specularIntensity" in m && m.specularIntensity > 0.6) m.specularIntensity = 0.45;
+      if("clearcoat" in m && m.clearcoat > 0.4) m.clearcoat = Math.min(m.clearcoat, 0.35);
+
+      // Leave authored emissive alone (windows, lights inside Home etc.)
+      // but clamp crazy values so they don't blow out
+      if(m.emissiveIntensity !== undefined && m.emissiveIntensity > 3){
+        m.emissiveIntensity = 2.2;
+      }
+
+      m.needsUpdate = true;
+    }
+  });
+}
+
+function place(o,name){
+  o.name=name||o.userData.type||"Object";
+  const base=player?player.position:new THREE.Vector3(0,groundY,0);
+  const offset=1.8+objects.length*0.15;
+  o.position.set(base.x+offset,groundY,base.z-2.2);
+  root.add(o);
+  objects.push(o);
+  fitToGround(o);
+  if(!o.userData.vehicle&&(o.userData.imported||o.userData.type==="Home"||o.userData.type==="Girl")){
+    requestAnimationFrame(()=>{
+      o.updateMatrixWorld(true);
+      o.traverse(c=>{if(c!==o)c.matrixAutoUpdate=false;});
+    });
+  }else{
+    o.traverse(c=>{c.matrixAutoUpdate=true});
+  }
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+}
+
+function refreshColliders(){
+  colliders.length=0;
+  collisionMeshes.length=0;
+  if(ground)collisionMeshes.push(ground);
+  for(const o of objects){
+    if(!o.visible||o.userData.solid===false)continue;
+    const b=new THREE.Box3().setFromObject(o);
+    const sx=b.max.x-b.min.x, sz=b.max.z-b.min.z;
+    const cx=(b.min.x+b.max.x)*.5, cz=(b.min.z+b.max.z)*.5;
+    colliders.push({o,c:{x:cx,z:cz},hx:sx/2+.02,hz:sz/2+.02});
+    collisionMeshes.push(o);
+  }
+}
+
+function refreshObjectList(){
+  const list=$("objectList");
+  if(!list)return;
+  list.innerHTML="";
+  if(!objects.length){
+    list.innerHTML='<div style="font-size:9px;color:var(--muted);padding:6px">No objects yet</div>';
+    return;
+  }
+  objects.forEach((o,i)=>{
+    const row=document.createElement("div");
+    row.className="item";
+    row.style.cssText="display:flex;align-items:center;justify-content:space-between;gap:6px;cursor:pointer;padding:7px 8px";
+    if(selected===o)row.style.background="rgba(120,180,255,.18)";
+    const label=document.createElement("span");
+    label.style.cssText="font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1";
+    const tag=o.userData.vehicle||isVehicle(o)?" 🚗":"";
+    label.textContent=`${i+1}. ${o.name||o.userData.type||"Object"}${tag}`;
+    const del=document.createElement("button");
+    del.className="close";
+    del.textContent="✕";
+    del.style.cssText="padding:4px 7px;font-size:9px;flex-shrink:0";
+    del.onclick=e=>{
+      e.stopPropagation();
+      selectObject(o);
+      deleteSelectedObject();
+    };
+    row.onclick=()=>{
+      if(selected===o)selectObject(null);
+      else selectObject(o);
+    };
+    row.appendChild(label);
+    row.appendChild(del);
+    list.appendChild(row);
+  });
+}
+function blocked(p,r,ignore){
+  for(const c of colliders){
+    if(c.o===ignore)continue;
+    const dx=Math.max(Math.abs(p.x-c.c.x)-c.hx,0);
+    const dz=Math.max(Math.abs(p.z-c.c.z)-c.hz,0);
+    if(dx*dx+dz*dz<r*r)return true;
+  }
+  return false;
+}
+function movePlayer(dx,dz){
+  if(!player)return;
+  const nx=player.position.x+dx;
+  const nz=player.position.z+dz;
+  if(Math.abs(nx)<worldSize/2-1 && !blocked(new THREE.Vector3(nx,player.position.y,player.position.z),.18,player))
+    player.position.x=nx;
+  if(Math.abs(nz)<worldSize/2-1 && !blocked(new THREE.Vector3(player.position.x,player.position.y,nz),.18,player))
+    player.position.z=nz;
+}
+
+const enabledAnimButtons=new Set();
+
+function isLocomotionAnim(n){
+  return /^(.*\b)?(idle|stand|standing|walk|walking|run|running|jog|sprint|locomotion|t-?pose|neutral)(\b.*)?$/i.test(n);
+}
+
+function safeClip(c){
+  const clone=c.clone();
+  clone.tracks=clone.tracks.map(t=>{
+    if(!/\.position$/.test(t.name)) return t;
+    const n=t.name.toLowerCase();
+    if(!/(root|hips|mixamorig:hips|mixamorighips)/.test(n)) return t;
+    const tr=t.clone();
+    for(let i=0;i<tr.values.length;i+=3){
+      tr.values[i]=0;
+      tr.values[i+2]=0;
+    }
+    return tr;
+  });
+  return clone;
+}
+
+function shortAnimName(n){
+  let s=String(n||"anim")
+    .replace(/mixamorig[:_]?/ig,"")
+    .replace(/armature\|?/ig,"")
+    .replace(/[^a-zA-Z0-9]+/g," ")
+    .trim();
+  if(s.length>14)s=s.slice(0,13)+"…";
+  return s||"anim";
+}
+
+function findAction(regexes){
+  const names=Object.keys(actions);
+  for(const re of regexes){
+    const n=names.find(x=>re.test(x));
+    if(n)return n;
+  }
+  return null;
+}
+
+function playAction(name,loop=THREE.LoopOnce){
+  const a=actions[name];
+  if(!a)return;
+  if(currentAction===a&&a.isRunning())return;
+  if(currentAction&&currentAction!==a)currentAction.fadeOut(0.12);
+  a.reset();
+  a.setLoop(loop,loop===THREE.LoopOnce?1:Infinity);
+  a.clampWhenFinished=loop===THREE.LoopOnce;
+  a.enabled=true;
+  a.fadeIn(0.12).play();
+  currentAction=a;
+}
+
+function setupAnimations(gltf){
+  mixer=new THREE.AnimationMixer(playerVisual);
+  actions={};
+  currentAction=null;
+  enabledAnimButtons.clear();
+
+  for(const clip of gltf.animations||[]){
+    const n=(clip.name||"clip").trim();
+    if(!n)continue;
+    if(/^(car|vehicle|door|wheel|steer)\b/i.test(n))continue;
+    actions[n]=mixer.clipAction(safeClip(clip));
+  }
+
+  const idle=findAction([/^idle$/i,/idle/i,/^stand$/i,/standing/i,/t-?pose/i,/neutral/i]);
+  if(idle)playAction(idle);
+  else{
+    const safe=Object.keys(actions).find(n=>!/punch|attack|hit|death|fall/i.test(n));
+    if(safe)playAction(safe);
+  }
+
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+
+  buildAnimChecklist();
+  buildAnimationButtons();
+}
+
+function buildAnimChecklist(){
+  const box=$("animChecklist");
+  if(!box)return;
+  box.innerHTML="";
+  const names=Object.keys(actions)
+    .filter(n=>!isLocomotionAnim(n))
+    .sort((a,b)=>a.localeCompare(b));
+  if(!names.length){
+    box.innerHTML='<div style="font-size:9px;color:var(--muted)">No extra animations (walk/run/idle are on movement controls)</div>';
+    return;
+  }
+  names.forEach(n=>{
+    const row=document.createElement("label");
+    row.style.cssText="display:flex;align-items:center;gap:8px;padding:7px 8px;border:0;border-radius:12px;background:rgba(255,255,255,.06);cursor:pointer";
+    const cb=document.createElement("input");
+    cb.type="checkbox";
+    cb.checked=enabledAnimButtons.has(n);
+    cb.style.accentColor="#fff";
+    const span=document.createElement("span");
+    span.style.cssText="font-size:10px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
+    span.textContent=shortAnimName(n);
+    span.title=n;
+    cb.onchange=()=>{
+      if(cb.checked)enabledAnimButtons.add(n);
+      else enabledAnimButtons.delete(n);
+      buildAnimationButtons();
+    };
+    row.appendChild(cb);
+    row.appendChild(span);
+    span.onclick=e=>{
+      e.preventDefault();
+      playAction(n);
+      toast(shortAnimName(n));
+    };
+    box.appendChild(row);
+  });
+}
+
+function buildAnimationButtons(){
+  const bar=$("actions");
+  if(!bar)return;
+  bar.querySelectorAll("button.anim-act").forEach(b=>b.remove());
+  const names=[...enabledAnimButtons].filter(n=>actions[n]&&!isLocomotionAnim(n));
+  names.forEach(n=>{
+    const b=document.createElement("button");
+    b.className="action anim-act";
+    b.textContent=shortAnimName(n);
+    b.title=n;
+    b.onpointerdown=e=>{
+      e.preventDefault();
+      playAction(n);
+    };
+    bar.appendChild(b);
+  });
+}
+
+async function loadMan(){
+  const loader=new GLTFLoader();
+  try{
+    const gltf=await loader.loadAsync("./Man.glb");
+    if(player)root.remove(player);
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+
+    playerVisual=gltf.scene;
+    playerVisual.name="Man.glb";
+    player.add(playerVisual);
+
+    // ---- Man-only local lights (never affect Home / Car / Girl / imports) ----
+    // Intensities driven exclusively by charFront / charBack / charFill sliders.
+    const manKey = new THREE.DirectionalLight(0xfff2e8, 0.55);
+    manKey.position.set(3.5, 5.0, 2.0);
+    manKey.name = "ManKey";
+    player.add(manKey);
+
+    const manFill = new THREE.HemisphereLight(0xeef2fa, 0x3a3a48, 0.75);
+    manFill.name = "ManFill";
+    player.add(manFill);
+
+    const manRim = new THREE.DirectionalLight(0xb8d0ff, 0.40);
+    manRim.position.set(-3.0, 3.5, -4.0);
+    manRim.name = "ManRim";
+    player.add(manRim);
+
+    const manSide = new THREE.DirectionalLight(0xffefe6, 0.25);
+    manSide.position.set(-2.5, 2.0, 3.0);
+    manSide.name = "ManSide";
+    player.add(manSide);
+
+    playerVisual.traverse(o=>{
+      if(o.isMesh){
+        o.castShadow=false;
+        o.receiveShadow=false;
+        o.frustumCulled=true;
+
+        const mats=Array.isArray(o.material)?o.material:[o.material];
+        for(const m of mats){
+          if(!m)continue;
+          // Man uses scene.environment for subtle IBL (independent of GLB objects)
+          if("envMapIntensity" in m) m.envMapIntensity = 0.85;
+          if(m.map){ m.map.colorSpace = THREE.SRGBColorSpace; m.map.needsUpdate = true; }
+          if(m.emissiveMap){ m.emissiveMap.colorSpace = THREE.SRGBColorSpace; m.emissiveMap.needsUpdate = true; }
+          for(const key of ["map","normalMap","roughnessMap","metalnessMap","aoMap","emissiveMap"]){
+            const tex=m[key];
+            if(!tex)continue;
+            tex.minFilter=THREE.LinearMipmapLinearFilter;
+            tex.magFilter=THREE.LinearFilter;
+            tex.anisotropy=Math.min(4,renderer.capabilities.getMaxAnisotropy());
+            tex.needsUpdate=true;
+          }
+          m.needsUpdate=true;
+        }
+      }
+    });
+
+    // Fixed start scale = 0.03 (stable default). Visual keeps GLB proportions.
+    // player.scale is the live scale factor saved/restored automatically.
+    playerVisual.scale.set(1,1,1);
+    player.scale.setScalar(0.03);
+
+    player.position.set(0,groundY,0);
+    move.x=0; move.z=0; running=false; velocityY=0; grounded=true;
+    root.add(player);
+
+    // Plant feet on ground after scale
+    player.updateMatrixWorld(true);
+    const vb=new THREE.Box3().setFromObject(player);
+    player.position.y += (groundY - vb.min.y);
+    playerVisual.position.y = 0;
+
+    _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+    cameraState.currentDistance = Math.max(2.5, _cachedCharH * 2.8);
+    cameraState.idealDistance = cameraState.currentDistance;
+    cameraState.userZoomClose = 0;
+    cameraState.userZoomNormal = 0;
+    cameraState.yaw = Math.PI;
+    cameraState.pitch = 0.32;
+    _camInitialized = false;
+    cameraSmoothPos.set(0,0,0);
+
+    setupAnimations(gltf);
+    refreshColliders();
+    updateManScaleUI();
+    queueSave(); // persist initial scale immediately
+    say("Man.glb ready");
+  }catch(e){
+    console.error(e);
+    player=new THREE.Group();
+    player.name="Man.glb";
+    player.userData={type:"Man",solid:true,player:true};
+    playerVisual=new THREE.Mesh(
+      new THREE.CapsuleGeometry(0.3,1.1,6,10),
+      mat(0x888888,0.7)
+    );
+    playerVisual.position.y=0.85;
+    playerVisual.castShadow=false;
+    player.add(playerVisual);
+    root.add(player);
+    say("Man.glb failed to load");
+  }
+}
+
+let driving=false;
+let currentVehicle=null;
+const carState={
+  speed:0,
+  maxSpeed:28,
+  accel:18,
+  brake:32,
+  coast:6,
+  turnRate:1.9,
+  steer:0
+};
+
+function isVehicle(o){
+  if(!o)return false;
+  if(o.userData.vehicle)return true;
+  const t=(o.userData.type||o.name||"").toLowerCase();
+  return /car|vehicle|auto|truck|bike/.test(t);
+}
+
+function findNearestVehicle(maxDist=14){
+  let best=null,bestD=maxDist;
+  if(!player) return null;
+  for(const o of objects){
+    if(!isVehicle(o))continue;
+    const d=o.position.distanceTo(player.position);
+    if(d<bestD){bestD=d;best=o}
+  }
+  return best;
+}
+
+function updateDriveButtonVisibility(){
+  const btn = $("driveAction");
+  if(!btn) return;
+  if(typeof gameStarted !== "undefined" && !gameStarted){
+    btn.classList.remove("show-drive");
+    return;
+  }
+  if(!player){
+    btn.classList.remove("show-drive");
+    return;
+  }
+  if(driving){
+    btn.classList.add("show-drive");
+    btn.textContent = "Exit";
+    return;
+  }
+  const near = findNearestVehicle(6);
+  if(near){
+    btn.classList.add("show-drive");
+    btn.textContent = "Drive";
+  } else {
+    btn.classList.remove("show-drive");
+  }
+}
+
+function enterVehicle(v){
+  if(!v||!player||driving)return;
+  driving=true;
+  currentVehicle=v;
+  v.userData.vehicle=true;
+  v.traverse(c=>{c.matrixAutoUpdate=true});
+  if(playerVisual)playerVisual.visible=false;
+  player.position.copy(v.position);
+  carState.speed=0;
+  carState.steer=0;
+  // Camera: behind car, slightly elevated (stable)
+  cameraState.yaw = v.rotation.y + Math.PI;
+  cameraState.pitch = 0.32;
+  cameraState.userZoomClose = 0;
+  cameraState.userZoomNormal = 0;
+  cameraState.currentDistance = 9;
+  cameraState.idealDistance = 9;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  selectObject(null);
+  toast("Driving — D-pad steer · wheel/pinch zoom · E exit");
+  say("Driving "+(v.name||"vehicle"));
+}
+
+function exitVehicle(){
+  if(!driving||!currentVehicle||!player)return;
+  const v=currentVehicle;
+  const side=new THREE.Vector3(1.8,0,0).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  player.position.copy(v.position).add(side);
+  player.position.y=groundY;
+  if(playerVisual)playerVisual.visible=true;
+  driving=false;
+  currentVehicle=null;
+  carState.speed=0;
+  cameraState.yaw = player.rotation.y + Math.PI;
+  cameraState.pitch = 0.28;
+  cameraState.userZoomClose = 0;
+  cameraState.userZoomNormal = 0;
+  cameraState.currentDistance = 5.0;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Drive";
+  toast("Exited vehicle");
+  say("On foot");
+}
+
+function toggleDrive(){
+  if(driving){
+    exitVehicle();
+    const btn=$("driveAction");
+    if(btn)btn.textContent="Drive";
+    return;
+  }
+  let v=null;
+  if(selected&&isVehicle(selected))v=selected;
+  else v=findNearestVehicle();
+  if(!v){toast("No car nearby — select Car in list or stand closer");return}
+  enterVehicle(v);
+  const btn=$("driveAction");
+  if(btn)btn.textContent="Exit";
+}
+
+if($("driveBtn"))$("driveBtn").onclick=e=>{e.preventDefault();toggleDrive()};
+if($("driveAction"))$("driveAction").onpointerdown=e=>{e.preventDefault();toggleDrive()};
+if($("deselectBtn"))$("deselectBtn").onclick=()=>{selectObject(null);toast("Deselected")};
+addEventListener("keydown",e=>{
+  if(e.code==="KeyE"&&!e.repeat)toggleDrive();
+  if(e.code==="Escape"){
+    if(typeof gameStarted !== "undefined" && gameStarted){
+      if($("pauseDialog") && $("pauseDialog").classList.contains("open")) closePauseDialog();
+      else openPauseDialog();
+    } else {
+      selectObject(null);
+    }
+  }
+});
+
+function updateVehicle(dt){
+  if(!driving||!currentVehicle)return;
+  const v=currentVehicle;
+  let throttle=0,steer=0;
+  // UP / W = forward, DN / S = reverse, LT = turn left, RT = turn right
+  if(keys.w||keys.ArrowUp||move.z<0)throttle+=1;
+  if(keys.s||keys.ArrowDown||move.z>0)throttle-=1;
+  if(keys.a||keys.ArrowLeft||move.x<0)steer+=1;
+  if(keys.d||keys.ArrowRight||move.x>0)steer-=1;
+
+  if(throttle>0)carState.speed+=carState.accel*dt*throttle;
+  else if(throttle<0)carState.speed+=carState.brake*dt*throttle;
+  else{
+    if(carState.speed>0)carState.speed=Math.max(0,carState.speed-carState.coast*dt);
+    else if(carState.speed<0)carState.speed=Math.min(0,carState.speed+carState.coast*dt);
+  }
+  carState.speed=THREE.MathUtils.clamp(carState.speed,-carState.maxSpeed*0.45,carState.maxSpeed);
+
+  const spd=Math.abs(carState.speed);
+  const steerFactor=spd<0.4?0:THREE.MathUtils.clamp(spd/carState.maxSpeed,0.2,1);
+  if(steer!==0&&spd>0.25){
+    const dir=Math.sign(carState.speed)||1;
+    v.rotation.y+=steer*carState.turnRate*steerFactor*dir*dt;
+  }
+
+  const forward=new THREE.Vector3(0,0,1).applyAxisAngle(new THREE.Vector3(0,1,0),v.rotation.y);
+  v.position.addScaledVector(forward,carState.speed*dt);
+
+  const box=new THREE.Box3().setFromObject(v);
+  v.position.y+=groundY-box.min.y;
+
+  const limit=worldSize*0.5-2;
+  v.position.x=THREE.MathUtils.clamp(v.position.x,-limit,limit);
+  v.position.z=THREE.MathUtils.clamp(v.position.z,-limit,limit);
+
+  player.position.copy(v.position);
+  player.rotation.y=v.rotation.y;
+  v.updateMatrixWorld(true);
+}
+
+function updateSelectedObject(dt){
+  if(driving||!selected||selected===player)return;
+  let ix=move.x,iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+  if(!ix&&!iz)return;
+
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+
+  const speed=(keys.Shift||running)?8:4;
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  const delta=new THREE.Vector3();
+  if(iz<0)delta.add(camDirMove);
+  if(iz>0)delta.sub(camDirMove);
+  if(ix<0)delta.sub(camRight);
+  if(ix>0)delta.add(camRight);
+  if(delta.lengthSq()>0.001){
+    delta.normalize().multiplyScalar(speed*dt);
+    selected.position.x+=delta.x;
+    selected.position.z+=delta.z;
+    selected.updateMatrixWorld(true);
+    if(selectionHelper){
+      const box=new THREE.Box3().setFromObject(selected);
+      selectionHelper.box.copy(box);
+    }
+    queueSave();
+  }
+}
+
+const moveDir=new THREE.Vector3();
+const camDirMove=new THREE.Vector3();
+const camRight=new THREE.Vector3();
+const bodyCenter=new THREE.Vector3();
+const nextPos=new THREE.Vector3();
+const rayOrigin=new THREE.Vector3();
+const downVector=new THREE.Vector3(0,-1,0);
+const finalMove=new THREE.Vector3();
+const velocityXZ=new THREE.Vector3();
+const movementRaycaster=new THREE.Raycaster();
+
+const MOVE={
+  walkSpeed:4.8,
+  runSpeed:9.2,
+  accel:18,
+  decel:22,
+  rotateSpeed:10,
+  jumpForce:7.0,
+  gravity:22,
+  stepHeight:0.55,
+  playerRadius:0.28
+};
+
+function jump(){
+  if(!player||!grounded)return;
+  velocityY=MOVE.jumpForce;
+  grounded=false;
+  const j=findAction([/jump/i]);
+  if(j)playAction(j);
+}
+
+function updatePlayer(dt){
+  if(!player)return;
+  if(driving)return;
+  if(selected&&selected!==player)return;
+
+  let ix=move.x, iz=move.z;
+  if(keys.w||keys.ArrowUp)iz-=1;
+  if(keys.s||keys.ArrowDown)iz+=1;
+  if(keys.a||keys.ArrowLeft)ix-=1;
+  if(keys.d||keys.ArrowRight)ix+=1;
+
+  ix=THREE.MathUtils.clamp(ix,-1,1);
+  iz=THREE.MathUtils.clamp(iz,-1,1);
+
+  const isMoving=Math.abs(ix)>0.01||Math.abs(iz)>0.01;
+  const isRunning=running||keys.Shift;
+
+  camera.getWorldDirection(camDirMove);
+  camDirMove.y=0;
+  if(camDirMove.lengthSq()<0.001)camDirMove.set(0,0,-1);
+  camDirMove.normalize();
+  camRight.crossVectors(camDirMove,cameraUp).normalize();
+
+  moveDir.set(0,0,0);
+  if(isMoving){
+    if(iz<0)moveDir.add(camDirMove);
+    if(iz>0)moveDir.sub(camDirMove);
+    if(ix<0)moveDir.sub(camRight);
+    if(ix>0)moveDir.add(camRight);
+    if(moveDir.lengthSq()>0.001)moveDir.normalize();
+  }
+
+  const targetSpeed=isMoving?(isRunning?MOVE.runSpeed:MOVE.walkSpeed):0;
+  const desiredVel=moveDir.clone().multiplyScalar(targetSpeed);
+
+  if(isMoving){
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.accel*dt));
+  }else{
+    velocityXZ.lerp(desiredVel,1-Math.exp(-MOVE.decel*dt));
+  }
+
+  // Height from scale (Game5 style) — base ~1.8m
+  const scaleFactor = getScaleFactor(player);
+  const charH = 1.8 * scaleFactor;
+  const radius = Math.max(0.15, charH * 0.16);
+  const stepH = Math.max(0.25, charH * 0.32);
+
+  if(velocityXZ.lengthSq()>0.0001){
+    finalMove.copy(velocityXZ).multiplyScalar(dt);
+    const limit=worldSize*0.5-0.6;
+    nextPos.copy(player.position).add(finalMove);
+    if(Math.abs(nextPos.x)>limit){nextPos.x=player.position.x;velocityXZ.x=0;}
+    if(Math.abs(nextPos.z)>limit){nextPos.z=player.position.z;velocityXZ.z=0;}
+
+    bodyCenter.copy(player.position);
+    bodyCenter.y+=charH*0.5;
+
+    const moveLen=finalMove.length();
+    if(moveLen>0.001){
+      const dir=finalMove.clone().normalize();
+      movementRaycaster.set(bodyCenter,dir);
+      movementRaycaster.far=moveLen+radius+0.15;
+      const hits=movementRaycaster.intersectObjects(collisionMeshes,true)
+        .filter(h=>!isPlayerObject(h.object));
+
+      if(hits.length && hits[0].distance<moveLen+radius){
+        const hit=hits[0];
+        const normal=hit.face?hit.face.normal.clone():new THREE.Vector3(0,0,1);
+        const slide=finalMove.clone().projectOnPlane(normal);
+        nextPos.copy(player.position).add(slide);
+
+        if(Math.abs(nextPos.x)>limit)nextPos.x=player.position.x;
+        if(Math.abs(nextPos.z)>limit)nextPos.z=player.position.z;
+      }
+    }
+
+    rayOrigin.set(nextPos.x,player.position.y+stepH+0.25,nextPos.z);
+    movementRaycaster.set(rayOrigin,downVector);
+    movementRaycaster.far=stepH+1.8;
+
+    const floorHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+      .filter(h=>!isPlayerObject(h.object));
+
+    if(floorHits.length){
+      const hitY=floorHits[0].point.y;
+      const diff=hitY-player.position.y;
+      if(diff<=stepH && diff>-0.9){
+        player.position.x=nextPos.x;
+        player.position.z=nextPos.z;
+        player.position.y=THREE.MathUtils.lerp(player.position.y,hitY,0.35);
+      }
+    }else{
+      player.position.x=nextPos.x;
+      player.position.z=nextPos.z;
+    }
+
+    const targetAngle=Math.atan2(velocityXZ.x,velocityXZ.z);
+    let diff=targetAngle-player.rotation.y;
+    while(diff<-Math.PI)diff+=Math.PI*2;
+    while(diff>Math.PI)diff-=Math.PI*2;
+    player.rotation.y+=diff*Math.min(1,MOVE.rotateSpeed*dt);
+  }
+
+  const speed=velocityXZ.length();
+  if(speed>0.8&&grounded){
+    const n=isRunning
+      ?findAction([/^run$/i,/run/i,/sprint/i])
+      :findAction([/^walk$/i,/walk/i,/jog/i,/locomotion/i]);
+    if(n)playAction(n,THREE.LoopRepeat);
+  }else if(grounded&&speed<0.15){
+    const idle=findAction([/^idle$/i,/idle/i,/stand/i]);
+    if(idle)playAction(idle,THREE.LoopRepeat);
+  }
+
+  velocityY-=MOVE.gravity*dt;
+  player.position.y+=velocityY*dt;
+
+  const checkH=Math.max(0.3,charH*0.25);
+  rayOrigin.set(player.position.x,player.position.y+checkH,player.position.z);
+  movementRaycaster.set(rayOrigin,downVector);
+  movementRaycaster.far=checkH+0.5;
+
+  const groundHits=movementRaycaster.intersectObjects(collisionMeshes,true)
+    .filter(h=>!isPlayerObject(h.object));
+
+  if(groundHits.length && velocityY<=0){
+    const gy=groundHits[0].point.y;
+    if(player.position.y<=gy+0.1){
+      player.position.y=gy;
+      velocityY=0;
+      grounded=true;
+    }
+  }else if(player.position.y<=groundY){
+    player.position.y=groundY;
+    velocityY=0;
+    grounded=true;
+  }else{
+    grounded=false;
+  }
+}
+
+function isElementInUI(target){
+  if(!target)return false;
+  return target!==canvas && !target.closest?.("#view");
+}
+
+// Camera input is handled by OrbitControls (same interaction model as a2.html).
+
+let selectionHelper=null;
+function selectObject(o){
+  selected=o;
+  if(!o){
+    $("selection").style.display="none";
+    if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+    refreshObjectList();
+    return;
+  }
+  $("selection").textContent=o.name||o.userData.type||"Object";
+  $("selection").style.display="block";
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  const box=new THREE.Box3().setFromObject(o);
+  if(!box.isEmpty()){
+    selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+    selectionHelper.material.depthTest=false;
+    selectionHelper.renderOrder=999;
+    scene.add(selectionHelper);
+  }
+  refreshObjectList();
+}
+
+function bindMove(id,x,z){
+  const el=$(id);
+  const on=e=>{
+    e.preventDefault();
+    if(el.setPointerCapture)try{el.setPointerCapture(e.pointerId)}catch(_){}
+    move.x=x; move.z=z;
+  };
+  const off=e=>{
+    e.preventDefault();
+    move.x=0; move.z=0;
+    if(el.releasePointerCapture)try{el.releasePointerCapture(e.pointerId)}catch(_){}
+  };
+  el.addEventListener("pointerdown",on);
+  ["pointerup","pointercancel","lostpointercapture"].forEach(t=>el.addEventListener(t,off));
+}
+bindMove("moveF",0,-1);
+bindMove("moveB",0,1);
+bindMove("moveL",-1,0);
+bindMove("moveR",1,0);
+
+$("jump").onpointerdown=e=>{e.preventDefault();jump()};
+
+// Run = toggle (one tap on, one tap off) — no need to hold
+function setRunning(on){
+  running = !!on;
+  const btn = $("run");
+  if(btn){
+    btn.textContent = running ? "Run ●" : "Run";
+    btn.style.background = running ? "rgba(255,100,80,.28)" : "";
+  }
+}
+$("run").onpointerdown = e => {
+  e.preventDefault();
+  setRunning(!running);
+};
+
+addEventListener("keydown",e=>{
+  keys[e.key]=true;
+  if(e.code==="Space")jump();
+  // Shift toggles run once (not hold)
+  if(e.key==="Shift" && !e.repeat) setRunning(!running);
+});
+addEventListener("keyup",e=>{
+  keys[e.key]=false;
+});
+addEventListener("keydown",e=>{if(e.key==="Delete"||e.key==="Backspace")$("delete").click()});
+
+function openPanel(id){
+  ["worldPanel","addPanel","animPanel"].forEach(x=>{
+    const el=$(x);
+    if(el)el.classList.remove("open");
+  });
+  const p=$(id);
+  if(p)p.classList.add("open");
+}
+$("worldBtn").onclick=()=>openPanel("worldPanel");
+$("addBtn").onclick=()=>openPanel("addPanel");
+$("animBtn").onclick=()=>{
+  openPanel("animPanel");
+  buildAnimChecklist();
+};
+function openPauseDialog(){
+  paused = true;
+  $("pause").textContent = "Pause";
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.add("open");
+  say("Paused");
+}
+function closePauseDialog(){
+  paused = false;
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.remove("open");
+  ["worldPanel","addPanel","animPanel"].forEach(id=>{
+    const el = $(id); if(el) el.classList.remove("open");
+  });
+  say("Resumed");
+}
+$("pause").onclick = () => {
+  if(paused && $("pauseDialog") && $("pauseDialog").classList.contains("open")){
+    closePauseDialog();
+  } else {
+    openPauseDialog();
+  }
+};
+if($("pauseResume")) $("pauseResume").onclick = () => closePauseDialog();
+if($("pauseMenu")) $("pauseMenu").onclick = () => {
+  closePauseDialog();
+  returnToMainMenu();
+};
+if($("pauseHome")) $("pauseHome").onclick = () => {
+  closePauseDialog();
+  if(driving) try{ exitVehicle(); }catch(_){}
+  returnToMainMenu();
+  say("Home");
+};
+if($("pauseExit")) $("pauseExit").onclick = () => {
+  try{ queueSave(); }catch(_){}
+  paused = true;
+  gameStarted = false;
+  try{ window.close(); }catch(_){}
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0c10;color:rgba(255,255,255,.7);font:14px Inter,sans-serif">You left AB Open World<br><span style="font-size:11px;opacity:.5;margin-top:8px;display:block">You can close this page</span></div>';
+};
+
+/* ---------- Main Menu ---------- */
+function showMainMenu(){
+  gameStarted = false;
+  paused = true;
+  const ui = $("ui");
+  if(ui) ui.classList.add("hidden-boot");
+  if(splashEl) splashEl.classList.add("hide");
+  const menu = $("mainMenu");
+  if(menu){
+    menu.classList.remove("hide");
+    menu.classList.add("open");
+  }
+}
+
+function returnToMainMenu(){
+  if(driving) try{ exitVehicle(); }catch(_){}
+  gameStarted = false;
+  paused = true;
+  const ui = $("ui");
+  if(ui) ui.classList.add("hidden-boot");
+  ["worldPanel","addPanel","animPanel"].forEach(id=>{
+    const el=$(id); if(el) el.classList.remove("open");
+  });
+  showMainMenu();
+  say("Main Menu");
+}
+
+function enterGameplay(){
+  gameStarted = true;
+  paused = false;
+  if(splashEl) splashEl.classList.add("hide");
+  const menu = $("mainMenu");
+  if(menu){
+    menu.classList.remove("open");
+    menu.classList.add("hide");
+  }
+  const ui = $("ui");
+  if(ui) ui.classList.remove("hidden-boot");
+  const dlg = $("pauseDialog");
+  if(dlg) dlg.classList.remove("open");
+  say("AB Open World");
+}
+
+// Main menu buttons
+if($("menuPlay")) $("menuPlay").onclick = ()=> enterGameplay();
+if($("menuSettings")) $("menuSettings").onclick = ()=>{
+  enterGameplay();
+  openPanel("worldPanel");
+};
+if($("menuAdd")) $("menuAdd").onclick = ()=>{
+  enterGameplay();
+  openPanel("addPanel");
+};
+if($("menuAnim")) $("menuAnim").onclick = ()=>{
+  enterGameplay();
+  openPanel("animPanel");
+  buildAnimChecklist();
+};
+if($("menuExit")) $("menuExit").onclick = ()=>{
+  try{ queueSave(); }catch(_){}
+  try{ window.close(); }catch(_){}
+  document.body.innerHTML = '<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a0c10;color:rgba(255,255,255,.7);font:14px Inter,sans-serif">You left AB Open World<br><span style="font-size:11px;opacity:.5;margin-top:8px;display:block">You can close this page</span></div>';
+};
+
+document.querySelectorAll("[data-close]").forEach(b=>
+  b.onclick=()=>$(b.dataset.close).classList.remove("open")
+);
+if($("animSelectAll"))$("animSelectAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  ["jump","wave","dance","sit","clap","cheer","yes","no","salute","kick","punch"].forEach(key=>{
+    const n=findAction([new RegExp(key,"i")]);
+    if(n&&!isLocomotionAnim(n))enabledAnimButtons.add(n);
+  });
+  if(!enabledAnimButtons.size){
+    Object.keys(actions).filter(n=>!isLocomotionAnim(n)).slice(0,6)
+      .forEach(n=>enabledAnimButtons.add(n));
+  }
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+if($("animClearAll"))$("animClearAll").onclick=()=>{
+  enabledAnimButtons.clear();
+  buildAnimChecklist();
+  buildAnimationButtons();
+};
+
+document.querySelectorAll("[data-type]").forEach(b=>b.onclick=async()=>{
+  const t=b.dataset.type;
+  if(t==="Man"){ $("modelFiles").click(); return; }
+  if(t==="Girl"){ await loadAssetGLB("./girl.glb","Girl","Girl"); return; }
+  if(t==="Home"){ await loadAssetGLB("./Home.glb","Home","Home"); return; }
+  if(t==="Car"){
+    say("Loading Car…");
+    const car = await loadAssetGLB("./Car.glb","Car","Car");
+    if(car){
+      car.userData.vehicle = true;
+      car.userData.type = "Car";
+      toast("Car added — press Drive or E near it");
+    } else {
+      // Fallback placeholder car so button always does something
+      const g = createPlaceholder("Car");
+      g.userData.vehicle = true;
+      g.userData.type = "Car";
+      g.name = "Car";
+      place(g, "Car");
+      toast("Car placeholder added (put Car.glb next to HTML)");
+    }
+    return;
+  }
+});
+
+function afterTransform(){
+  if(!selected)return;
+  selected.updateMatrixWorld(true);
+  selected.traverse(c=>{c.matrixAutoUpdate=true});
+  if(selectionHelper){
+    scene.remove(selectionHelper);
+    selectionHelper=null;
+    const box=new THREE.Box3().setFromObject(selected);
+    if(!box.isEmpty()){
+      selectionHelper=new THREE.Box3Helper(box,0x88ccff);
+      selectionHelper.material.depthTest=false;
+      selectionHelper.renderOrder=999;
+      scene.add(selectionHelper);
+    }
+  }
+  refreshColliders();
+  queueSave();
+}
+$("rotL").onclick=()=>{if(selected){selected.rotation.y-=Math.PI/12;afterTransform()}};
+$("rotR").onclick=()=>{if(selected){selected.rotation.y+=Math.PI/12;afterTransform()}};
+$("raise").onclick=()=>{if(selected){selected.position.y+=.25;afterTransform()}};
+$("lower").onclick=()=>{if(selected){selected.position.y-=.25;afterTransform()}};
+if($("scaleMinus"))$("scaleMinus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(0.9);
+  afterTransform();
+};
+if($("scalePlus"))$("scalePlus").onclick=()=>{
+  if(!selected||selected===player)return toast("Select an object first");
+  selected.scale.multiplyScalar(1.12);
+  afterTransform();
+};
+
+function deleteSelectedObject(){
+  if(!selected)return toast("Select an object first");
+  if(selected===player)return toast("Man cannot be deleted");
+  const name=selected.name||"Object";
+  const i=objects.indexOf(selected);
+  if(i>=0)objects.splice(i,1);
+  disposeObject(selected);
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("Deleted "+name);
+}
+$("delete").onclick=deleteSelectedObject;
+if($("deleteSelected"))$("deleteSelected").onclick=deleteSelectedObject;
+if($("deleteAllObjs"))$("deleteAllObjs").onclick=()=>{
+  if(!objects.length)return toast("Nothing to delete");
+  for(const o of [...objects])disposeObject(o);
+  objects.length=0;
+  selected=null;
+  if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null;}
+  $("selection").style.display="none";
+  refreshColliders();
+  refreshObjectList();
+  queueSave();
+  toast("All objects deleted");
+};
+
+const fileUrls=new Map();
+const manager=new THREE.LoadingManager();
+manager.setURLModifier(url=>{
+  let key=url.split("/").pop().split("?")[0];try{key=decodeURIComponent(key)}catch(_){}
+  return fileUrls.get(key)||url;
+});
+const importLoader=new GLTFLoader(manager);
+let importBusy=false;
+
+async function activateImportedMan(gltf,assetKey,fileName){
+  const oldPos=player?player.position.clone():new THREE.Vector3(0,groundY,0);
+  await buildManFromGLTF(gltf,assetKey,fileName,oldPos);
+  queueSave();
+}
+async function buildManFromGLTF(gltf,assetKey,fileName,pos){
+  if(player)root.remove(player);
+  player=new THREE.Group();
+  player.name=fileName||"Man.glb";
+  player.userData={type:"Man",solid:true,player:true,assetKey:assetKey,imported:true};
+  playerVisual=gltf.scene;
+  playerVisual.name=player.name;
+  player.add(playerVisual);
+  // Man-only local lights (identical to loadMan — never affect other GLBs)
+  const manKey=new THREE.DirectionalLight(0xfff2e8,0.55);manKey.position.set(3.5,5,2);manKey.name="ManKey";player.add(manKey);
+  const manFill=new THREE.HemisphereLight(0xeef2fa,0x3a3a48,0.75);manFill.name="ManFill";player.add(manFill);
+  const manRim=new THREE.DirectionalLight(0xb8d0ff,0.40);manRim.position.set(-3,3.5,-4);manRim.name="ManRim";player.add(manRim);
+  const manSide=new THREE.DirectionalLight(0xffefe6,0.25);manSide.position.set(-2.5,2,3);manSide.name="ManSide";player.add(manSide);
+  playerVisual.traverse(o=>{
+    if(!o.isMesh) return;
+    o.castShadow=false;
+    o.receiveShadow=false;
+    o.frustumCulled=true;
+    const mats=Array.isArray(o.material)?o.material:[o.material];
+    for(const m of mats){
+      if(!m) continue;
+      if("envMapIntensity" in m) m.envMapIntensity=0.85;
+      if(m.map){ m.map.colorSpace=THREE.SRGBColorSpace; m.map.needsUpdate=true; }
+      if(m.emissiveMap){ m.emissiveMap.colorSpace=THREE.SRGBColorSpace; m.emissiveMap.needsUpdate=true; }
+      m.needsUpdate=true;
+    }
+  });
+  playerVisual.scale.set(1,1,1);
+  // If restoring with a position, scale may be applied later from save; default 0.03
+  if(!player.scale || player.scale.x === 1 && player.scale.y === 1 && player.scale.z === 1){
+    player.scale.setScalar(0.03);
+  }
+  player.position.copy(pos||new THREE.Vector3(0,groundY,0));
+  root.add(player);
+  player.updateMatrixWorld(true);
+  const vb=new THREE.Box3().setFromObject(player);
+  player.position.y += (groundY - vb.min.y);
+  playerVisual.position.y = 0;
+  _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+  cameraState.currentDistance = Math.max(2.5, _cachedCharH * 2.8);
+  cameraState.userZoomClose=0;
+  cameraState.userZoomNormal=0;
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  setupAnimations(gltf);
+  refreshColliders();
+  updateManScaleUI();
+  queueSave();
+  say(fileName+" active");
+}
+async function importOneFile(file, sharedUrls, customName, sharedFiles=[]){
+  const sourceUrl=sharedUrls.get(file.name)||URL.createObjectURL(file);
+  const gltf=await importLoader.loadAsync(sourceUrl);
+  const o=gltf.scene;
+  const assetKey="user:"+file.name+":"+file.size+":"+file.lastModified;
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction(STORE_ASSETS,"readwrite");
+    tx.objectStore(STORE_ASSETS).put({key:assetKey,name:file.name,blob:file,type:file.type||"model/gltf-binary",
+      files:sharedFiles.map(f=>({name:f.name,blob:f,type:f.type||"application/octet-stream",lastModified:f.lastModified||0,size:f.size||0}))});
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error('Asset save failed'));tx.onabort=()=>reject(tx.error||new Error('Asset save aborted'))});
+  }catch(err){console.warn("Asset storage failed",err);toast('Model loaded, but local saving failed: '+(err?.message||''))}
+  const low=file.name.toLowerCase();
+  let type="Object";
+  if(/car|vehicle/.test(low))type="Car";
+  else if(/home|house|building/.test(low))type="Home";
+  else if(/girl|woman|female/.test(low))type="Girl";
+  else if(/man|male|character/.test(low))type="Man";
+  else if(/mirror|glass/.test(low))type="Mirror";
+
+  o.userData={
+    type,
+    solid:true,
+    imported:true,
+    vehicle:type==="Car"||/car|vehicle/i.test(type+file.name),
+    assetKey
+  };
+  o.name=customName||file.name.replace(/\.(glb|gltf)$/i,"");
+  optimizeImportedModel(o);
+  // Apply the same Mirror-name rule used by Home.glb to every imported asset.
+  prepareHomeMirrors(o);
+  if(type==="Man"){
+    await activateImportedMan(gltf,assetKey,file.name);
+    return player;
+  }
+  place(o,o.name);
+  return o;
+}
+
+$("importModel").onclick=async()=>{
+  if(importBusy)return toast("Import already running…");
+  const fs=[...$("modelFiles").files];
+  if(!fs.length)return toast("Choose a GLB or GLTF file");
+
+  const models=fs.filter(f=>/\.(glb|gltf)$/i.test(f.name));
+  if(!models.length)return toast("Choose GLB or GLTF");
+
+  importBusy=true;
+  const status=$("importStatus");
+  fileUrls.clear();
+  const blobList=[];
+  fs.forEach(f=>{
+    const u=URL.createObjectURL(f);
+    blobList.push(u);
+    fileUrls.set(f.name,u);
+  });
+
+  const baseName=$("objectName").value.trim();
+  let done=0;
+  try{
+    for(const file of models){
+      if(status)status.textContent=`Loading ${done+1}/${models.length}: ${file.name}`;
+      say(`Loading ${file.name}…`);
+      await new Promise(r=>setTimeout(r,30));
+      try{
+        const name=models.length===1&&baseName?baseName:undefined;
+        await importOneFile(file,fileUrls,name,fs);
+        done++;
+      }catch(err){
+        console.error(err);
+        toast("Failed: "+file.name);
+      }
+    }
+    if(status)status.textContent=done?`Imported ${done} model(s)`:"Import finished with errors";
+    toast(done?`Imported ${done} model(s)`:"Import failed");
+  }finally{
+    importBusy=false;
+    setTimeout(()=>{blobList.forEach(u=>{try{URL.revokeObjectURL(u)}catch(_){}});fileUrls.clear()},5000);
+  }
+};
+
+// Local model library: models and their companion .bin/texture files are stored as Blobs in IndexedDB.
+async function readStoredAssets(){
+  const db=await dbOpen();
+  return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE_ASSETS,'readonly');const req=tx.objectStore(STORE_ASSETS).getAll();req.onsuccess=()=>resolve(req.result||[]);req.onerror=()=>reject(req.error||new Error('Cannot read saved models'))});
+}
+async function addStoredAsset(assetKey){
+  if(importBusy)return toast('Please wait for the current import');
+  importBusy=true;
+  const status=$('importStatus');
+  let urls=[];
+  try{
+    const db=await dbOpen();
+    const ar=await new Promise((resolve,reject)=>{const tx=db.transaction(STORE_ASSETS,'readonly');const req=tx.objectStore(STORE_ASSETS).get(assetKey);req.onsuccess=()=>resolve(req.result||null);req.onerror=()=>reject(req.error)});
+    if(!ar?.blob)throw new Error('Saved model file not found');
+    const bundle=ar.files?.length?ar.files:[{name:ar.name,blob:ar.blob,type:ar.type}];
+    for(const f of bundle){const u=URL.createObjectURL(f.blob);urls.push(u);fileUrls.set(f.name,u)}
+    // Always map the main file name to its own blob, even when it is not the first bundled file.
+    if(!fileUrls.has(ar.name)){const u=URL.createObjectURL(ar.blob);urls.push(u);fileUrls.set(ar.name,u)}
+    const gltf=await importLoader.loadAsync(fileUrls.get(ar.name));
+    const low=(ar.name||'').toLowerCase();let type='Object';
+    if(/car|vehicle/.test(low))type='Car';else if(/home|house|building/.test(low))type='Home';else if(/girl|woman|female/.test(low))type='Girl';else if(/man|male|character/.test(low))type='Man';else if(/mirror|glass/.test(low))type='Mirror';
+    if(type==='Man'){
+      await activateImportedMan(gltf,ar.key,ar.name);
+    }else{
+      const o=gltf.scene;o.userData={type,solid:true,imported:true,assetKey:ar.key,vehicle:type==='Car'};o.name=(ar.name||'Model').replace(/\.(glb|gltf)$/i,'');optimizeImportedModel(o);prepareHomeMirrors(o);place(o,o.name);
+    }
+    if(status)status.textContent='Added from saved local storage: '+ar.name;
+    toast('Added '+ar.name+' from saved files');
+  }catch(e){console.warn('Add saved model failed',e);toast('Could not add saved model: '+(e?.message||''))}
+  finally{for(const u of urls){try{URL.revokeObjectURL(u)}catch(_){}}for(const [name,u] of [...fileUrls]){if(urls.includes(u))fileUrls.delete(name)}importBusy=false;queueSave()}
+}
+$('scanSavedModels')?.addEventListener('click',async()=>{
+  const box=$('savedModelsList');if(!box)return;
+  if(box.style.display!=='none'&&box.dataset.loaded==='1'){box.style.display='none';return}
+  box.style.display='block';box.innerHTML='<div class="sub">Scanning saved local files…</div>';
+  try{
+    const rows=(await readStoredAssets()).filter(a=>a?.blob&&/\.(glb|gltf)$/i.test(a.name||''));
+    box.innerHTML='';box.dataset.loaded='1';
+    if(!rows.length){box.innerHTML='<div class="sub">No saved models yet. Select the GLB/GLTF and all related .bin/images together, then tap Import model(s). They will appear here.</div>';return}
+    rows.sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+    for(const a of rows){const row=document.createElement('div');row.style.cssText='display:flex;align-items:center;gap:6px;padding:6px;margin:4px 0;border-radius:10px;background:rgba(255,255,255,.06)';const label=document.createElement('div');label.textContent=a.name+' · '+Math.max(1,Math.round((a.blob.size||0)/1024))+' KB';label.style.cssText='font-size:10px;flex:1;overflow-wrap:anywhere';const add=document.createElement('button');add.className='item';add.textContent='Add';add.onclick=()=>addStoredAsset(a.key);row.append(label,add);box.appendChild(row)}
+  }catch(e){box.innerHTML='<div class="sub">Could not read saved models. Storage may be blocked or full.</div>';console.warn(e)}
+});
+
+function range(id,fn){const el=$(id);if(el)el.oninput=e=>fn(+e.target.value)}
+range("day",v=>{env.day=v;applyEnvironment();queueSave()});
+range("sunAngle",v=>{env.angle=v;applyEnvironment();queueSave()});
+range("skySat",v=>{env.skySat=v;applyEnvironment();queueSave()});
+range("charFront",v=>{env.charFront=v;applyEnvironment();queueSave()});
+range("charBack",v=>{env.charBack=v;applyEnvironment();queueSave()});
+range("charFill",v=>{env.charFill=v;applyEnvironment();queueSave()});
+range("fog",v=>{env.fog=v;applyEnvironment();queueSave()});
+range("light",v=>{env.light=v;applyEnvironment();queueSave()});
+/* ---------- Man scale (Game5 style: multiply player.scale) ---------- */
+function updateManScaleUI(){
+  const v = $("manScaleValue");
+  if(v && player) v.textContent = getScaleFactor(player).toFixed(4);
+  else if(v) v.textContent = "0.0300";
+}
+function applyManScale(factor){
+  if(!player) return;
+  player.scale.multiplyScalar(factor);
+  // Keep feet on ground after scale
+  player.updateMatrixWorld(true);
+  const vb = new THREE.Box3().setFromObject(player);
+  if(vb.min.y < groundY - 0.001){
+    player.position.y += (groundY - vb.min.y);
+  }
+  _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+  // Re-snap camera to new height (prevents feet dive)
+  _camInitialized = false;
+  cameraSmoothPos.set(0,0,0);
+  cameraState.currentDistance = Math.max(cameraState.minDistance, _cachedCharH * 2.6);
+  updateManScaleUI();
+  queueSave(); // always persist scale automatically
+}
+if($("manScaleMinus")) $("manScaleMinus").onclick = () => applyManScale(0.9);
+if($("manScalePlus")) $("manScalePlus").onclick = () => applyManScale(1.1);
+
+// Camera mode buttons (Game5 style)
+if($("btnCamClose")) $("btnCamClose").onclick = () => {
+  cameraMode = 'close';
+  if(player){orbitControls.userData.followInitialized=true;const h=Math.max(.8,_cachedCharH||1.8);const dir=camera.position.clone().sub(orbitControls.target).normalize();camera.position.copy(orbitControls.target).addScaledVector(dir,Math.max(2.5,h*2.8));orbitControls.update();} queueSave();
+  $("btnCamClose").style.color = '#e8f0f8';
+  if($("btnCamNormal")) $("btnCamNormal").style.color = 'white';
+};
+if($("btnCamNormal")) $("btnCamNormal").onclick = () => {
+  cameraMode = 'normal';
+  if(player){orbitControls.userData.followInitialized=true;const h=Math.max(.8,_cachedCharH||1.8);const dir=camera.position.clone().sub(orbitControls.target).normalize();camera.position.copy(orbitControls.target).addScaledVector(dir,Math.max(5.5,h*4.6));orbitControls.update();} queueSave();
+  $("btnCamNormal").style.color = '#e8f0f8';
+  if($("btnCamClose")) $("btnCamClose").style.color = 'white';
+};
+
+const DB_NAME="LG_SAVE_DB_V2";
+const DB_VER=1;
+const STORE_WORLD="world_v2";
+const STORE_OBJECTS="objects_v2";
+const STORE_ASSETS="assets_v2";
+let dbPromise=null,saveTimer=0,saveBusy=false,saveAgain=false;
+function dbOpen(){
+  if(dbPromise)return dbPromise;
+  dbPromise=new Promise((resolve,reject)=>{
+    let req;
+    try{req=indexedDB.open(DB_NAME,DB_VER)}catch(err){dbPromise=null;reject(err);return}
+    req.onupgradeneeded=()=>{
+      const db=req.result;
+      if(!db.objectStoreNames.contains(STORE_WORLD))db.createObjectStore(STORE_WORLD);
+      if(!db.objectStoreNames.contains(STORE_OBJECTS))db.createObjectStore(STORE_OBJECTS,{keyPath:"id"});
+      if(!db.objectStoreNames.contains(STORE_ASSETS))db.createObjectStore(STORE_ASSETS,{keyPath:"key"});
+    };
+    req.onsuccess=()=>{const db=req.result;db.onversionchange=()=>db.close();resolve(db)};
+    req.onerror=()=>{dbPromise=null;reject(req.error||new Error("IndexedDB open failed"))};
+    req.onblocked=()=>console.warn("Save database is blocked by another tab");
+  });
+  return dbPromise;
+}
+function snapshot(){
+  const rows=objects.map((o,i)=>({id:i+1,name:o.name,type:o.userData.type||"Object",pos:o.position.toArray(),rot:[o.rotation.x,o.rotation.y,o.rotation.z],scale:o.scale.toArray(),assetKey:o.userData.assetKey||null,assetPath:o.userData.assetPath||null}));
+  // Always save player transform so position is restored
+  if(player){
+    rows.push({
+      id:999999,
+      name:player.name||"Man",
+      type:"Man",
+      pos:player.position.toArray(),
+      rot:[player.rotation.x,player.rotation.y,player.rotation.z],
+      scale:player.scale.toArray(),
+      assetKey:player.userData?.assetKey||null
+    });
+  }
+  return rows;
+}
+function queueSave(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveState(),300)}
+async function saveState(){
+  if(saveBusy){saveAgain=true;return}
+  saveBusy=true;
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction([STORE_WORLD,STORE_OBJECTS],"readwrite");
+    tx.objectStore(STORE_WORLD).put({
+      version:2,
+      env:{...env},
+      worldSize,
+      groundY,
+      playerScale:player?player.scale.toArray():[1,1,1],
+      playerAssetKey:player?.userData?.assetKey||null,
+      playerPos:player?player.position.toArray():[0,0,0],
+      playerRot:player?[player.rotation.x,player.rotation.y,player.rotation.z]:[0,0,0],
+      camera:{position:camera.position.toArray(),target:orbitControls.target.toArray(),zoom:camera.zoom,
+        mode:cameraMode,state:{...cameraState},followInitialized:!!orbitControls.userData.followInitialized},
+      control:window.__saveControlState?window.__saveControlState():null
+    },"settings");
+    const os=tx.objectStore(STORE_OBJECTS);os.clear();
+    for(const d of snapshot())os.put(d);
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error("Save transaction failed"));tx.onabort=()=>reject(tx.error||new Error("Save transaction aborted"))});
+  }catch(e){console.warn("Save skipped:",e?.name||e)}
+  finally{saveBusy=false;if(saveAgain){saveAgain=false;queueSave()}}
+}
+async function restoreState(){
+  try{
+    const db=await dbOpen();
+    const tx=db.transaction([STORE_WORLD,STORE_OBJECTS,STORE_ASSETS],"readonly");
+    const settingsReq=tx.objectStore(STORE_WORLD).get("settings");
+    const allReq=tx.objectStore(STORE_OBJECTS).getAll();
+    const assetsReq=tx.objectStore(STORE_ASSETS).getAll();
+    await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||new Error("Restore transaction failed"));tx.onabort=()=>reject(tx.error||new Error("Restore transaction aborted"))});
+    const settings=settingsReq.result;
+    const storedAssetMap=new Map((assetsReq.result||[]).map(a=>[a.key,a]));
+    if(settings?.env){
+      Object.assign(env, settings.env);
+      const mapIds = {day:"day", angle:"sunAngle", skySat:"skySat", fog:"fog", light:"light",
+                      charFront:"charFront", charBack:"charBack", charFill:"charFill"};
+      for(const [k,id] of Object.entries(mapIds)){
+        const el = $(id);
+        if(el && env[k] !== undefined) el.value = env[k];
+      }
+      // restore ground UI
+      const gc = $("groundColor");
+      if(gc && env.groundColor) gc.value = env.groundColor;
+      const gb = $("groundBrightness");
+      if(gb && env.groundBrightness !== undefined){
+        gb.value = env.groundBrightness;
+        const gbv = $("groundBrightnessValue");
+        if(gbv) gbv.textContent = Number(env.groundBrightness).toFixed(2);
+      }
+      // apply ground material immediately
+      if(typeof groundMat !== "undefined" && groundMat){
+        if(env.groundColor) groundMat.color.set(env.groundColor);
+        const b = Number(env.groundBrightness) || 1;
+        groundMat.color.multiplyScalar(b);
+        groundMat.needsUpdate = true;
+      }
+    }
+    // Keep large open world; ignore smaller legacy saved sizes
+    if(settings?.worldSize && settings.worldSize >= 5000) worldSize = settings.worldSize;
+    else worldSize = 5000;
+    if(typeof settings?.groundY === "number") groundY = settings.groundY;
+    if(settings?.camera){
+      window.__savedCameraState=settings.camera;
+      if(settings.camera.mode) cameraMode=settings.camera.mode;
+      if(settings.camera.state) Object.assign(cameraState,settings.camera.state);
+    }
+    if(settings?.control) window.__savedControlStateData=settings.control;
+    buildSimpleGround();
+    refreshColliders();
+    window.__savedPlayerScale = settings?.playerScale || null;
+    window.__savedPlayerPos = settings?.playerPos || null;
+    window.__savedPlayerRot = settings?.playerRot || null;
+    for(const d of (allReq.result||[])){
+      if(d.type==="Man" && d.assetKey){
+        const ar=storedAssetMap.get(d.assetKey)||null;
+        if(ar?.blob){
+          const urls=[];
+          try{
+            const bundle=ar.files?.length?ar.files:[{name:ar.name,blob:ar.blob}];
+            for(const f of bundle){const u=URL.createObjectURL(f.blob);urls.push(u);fileUrls.set(f.name,u)}
+            const mainUrl=fileUrls.get(ar.name)||URL.createObjectURL(ar.blob);
+            const g=await importLoader.loadAsync(mainUrl);
+            await buildManFromGLTF(g,d.assetKey,d.name,new THREE.Vector3().fromArray(d.pos));
+          }catch(err){console.warn('Could not restore imported character',err)}
+          finally{for(const u of urls){try{URL.revokeObjectURL(u)}catch(_){}} for(const f of (ar.files||[]))fileUrls.delete(f.name)}
+        }
+      }else if(d.assetKey && String(d.assetKey).startsWith('user:')){
+        const ar=storedAssetMap.get(d.assetKey)||null;
+        if(ar?.blob){
+          const urls=[];
+          try{
+            const bundle=ar.files?.length?ar.files:[{name:ar.name,blob:ar.blob}];
+            for(const f of bundle){const u=URL.createObjectURL(f.blob);urls.push(u);fileUrls.set(f.name,u)}
+            const mainUrl=fileUrls.get(ar.name)||URL.createObjectURL(ar.blob);
+            const gltf=await importLoader.loadAsync(mainUrl);
+            const o=gltf.scene;
+            o.userData={type:d.type||'Object',solid:true,imported:true,assetKey:d.assetKey,assetPath:null,vehicle:(d.type==='Car')};
+            o.name=d.name||ar.name||'Object'; optimizeImportedModel(o); prepareHomeMirrors(o);
+            root.add(o);objects.push(o);o.position.fromArray(d.pos||[0,0,0]);o.rotation.set(...(d.rot||[0,0,0]));o.scale.fromArray(d.scale||[1,1,1]);
+          }catch(err){console.warn('Could not restore imported asset '+(d.name||''),err)}
+          finally{for(const u of urls){try{URL.revokeObjectURL(u)}catch(_){}} for(const f of (ar.files||[]))fileUrls.delete(f.name)}
+        }
+      }else if(d.type==="Girl"||d.type==="Home"||d.type==="Car"){
+        const path=d.type==="Girl"?"./girl.glb":d.type==="Home"?"./Home.glb":"./Car.glb";
+        const obj=await loadAssetGLB(path,d.type,d.name,{skipPlace:true});
+        if(obj){obj.position.fromArray(d.pos||[0,0,0]);obj.rotation.set(...(d.rot||[0,0,0]));obj.scale.fromArray(d.scale||[1,1,1]);obj.updateMatrixWorld(true)}
+      }
+    }
+    refreshColliders();refreshObjectList();
+    // Restore player position (from settings or from Man snapshot row)
+    const applyPlayerTransform = () => {
+      if(!player) return;
+      const pos = window.__savedPlayerPos;
+      const rot = window.__savedPlayerRot;
+      const scl = window.__savedPlayerScale;
+      if(scl && Array.isArray(scl) && scl.length >= 3){
+        player.scale.fromArray(scl);
+      } else {
+        // no save yet → keep default 0.03
+        if(Math.abs(player.scale.x - 1) < 1e-6) player.scale.setScalar(0.03);
+      }
+      if(pos && Array.isArray(pos) && pos.length >= 3){
+        player.position.fromArray(pos);
+      }
+      if(rot && Array.isArray(rot) && rot.length >= 3){
+        player.rotation.set(rot[0], rot[1], rot[2]);
+      }
+      player.updateMatrixWorld(true);
+      const vb = new THREE.Box3().setFromObject(player);
+      _cachedCharH = Math.max(0.05, vb.max.y - vb.min.y);
+      _camInitialized = false;
+      cameraSmoothPos.set(0,0,0);
+      updateManScaleUI();
+      queueSave(); // keep storage in sync with live scale
+    };
+    // Delay slightly so loadMan has finished
+    setTimeout(applyPlayerTransform, 120);
+    setTimeout(applyPlayerTransform, 600);
+    const applySavedCamera=()=>{
+      const c=window.__savedCameraState;if(!c)return;
+      try{
+        if(Array.isArray(c.position))camera.position.fromArray(c.position);
+        if(Array.isArray(c.target))orbitControls.target.fromArray(c.target);
+        if(Number.isFinite(c.zoom)){camera.zoom=c.zoom;camera.updateProjectionMatrix()}
+        orbitControls.userData.followInitialized=!!c.followInitialized;
+        orbitControls.update();
+      }catch(e){console.warn('Camera restore skipped',e)}
+    };
+    setTimeout(applySavedCamera,180);setTimeout(applySavedCamera,700);
+    if(window.__restoreControlState) setTimeout(()=>window.__restoreControlState(window.__savedControlStateData),700);
+
+    applyEnvironment();
+    refreshColliders();
+    refreshObjectList();
+  }catch(e){console.warn("Restore skipped:",e?.name||e)}
+}
+$("clearSave").onclick=async()=>{
+  try{const db=await dbOpen();const tx=db.transaction([STORE_WORLD,STORE_OBJECTS],"readwrite");tx.objectStore(STORE_WORLD).clear();tx.objectStore(STORE_OBJECTS).clear();await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)});for(const o of [...objects])disposeObject(o);objects.length=0;selected=null;if(selectionHelper){scene.remove(selectionHelper);selectionHelper=null}$('selection').style.display="none";refreshColliders();refreshObjectList();toast("World storage cleared")}catch(e){toast("Storage reset failed")}
+};
+
+updateManScaleUI();
+
+/* ---------- Splash boot: real load progress, Play when ready ---------- */
+let gameStarted = false;
+const splashEl = $("splash");
+const splashBar = $("splashBar");
+const splashStatus = $("splashStatus");
+const playBtn = $("playBtn");
+const splashLines = splashEl ? splashEl.querySelectorAll(".splash-line") : [];
+
+function showSplashLine(index){
+  if(!splashLines || !splashLines.length) return;
+  splashLines.forEach((el, i) => {
+    if(i === index){
+      el.classList.remove("dim");
+      el.classList.add("show");
+    } else if(el.classList.contains("show")){
+      el.classList.add("dim");
+      el.classList.remove("show");
+    } else {
+      el.classList.remove("show");
+      el.classList.remove("dim");
+    }
+  });
+}
+
+function setSplashProgress(pct, msg, lineIndex){
+  if(splashBar) splashBar.style.width = Math.max(0, Math.min(100, pct)) + "%";
+  if(splashStatus) splashStatus.textContent = msg || "";
+  if(typeof lineIndex === "number") showSplashLine(lineIndex);
+}
+
+function unlockPlay(){
+  if(playBtn){
+    playBtn.classList.add("ready");
+    playBtn.textContent = "Continue";
+  }
+  setSplashProgress(100, "Ready — continue to menu", 4);
+}
+
+function startGame(){
+  // After splash → Main Menu (not direct into world)
+  if(splashEl) splashEl.classList.add("hide");
+  showMainMenu();
+  say("Main Menu");
+}
+
+if(playBtn){
+  playBtn.onclick = e => {
+    e.preventDefault();
+    if(!playBtn.classList.contains("ready")) return;
+    startGame();
+  };
+}
+
+async function bootGame(){
+  try{
+    setSplashProgress(6, "Initializing systems…", 0);
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => setTimeout(r, 280));
+
+    setSplashProgress(22, "Loading character…", 1);
+    await loadMan();
+
+    setSplashProgress(52, "Restoring saved world…", 2);
+    await restoreState();
+
+    setSplashProgress(78, "Calibrating lights & camera…", 3);
+    applyEnvironment();
+    await new Promise(r => setTimeout(r, 320));
+
+    setSplashProgress(100, "Ready — continue to menu", 4);
+    unlockPlay();
+  }catch(err){
+    console.error(err);
+    setSplashProgress(100, "Loaded with some warnings", 4);
+    unlockPlay();
+  }
+}
+
+addEventListener("resize",()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight,false);
+  orbitControls.update();
+  if(typeof resizeMirrorReflectors === "function") resizeMirrorReflectors();
+});
+
+const clock=new THREE.Clock();
+let _lastPosSave = 0;
+function frame(){
+  requestAnimationFrame(frame);
+  const dt = Math.min(clock.getDelta(), 0.033);
+
+  if(gameStarted && !paused){
+    if(driving){
+      updateVehicle(dt);
+    }else if(selected && selected !== player){
+      updateSelectedObject(dt);
+    }else{
+      updatePlayer(dt);
+    }
+    updateFollowCamera(dt);
+    if(window.__a2ControlBeforeMixer) window.__a2ControlBeforeMixer();
+    if(mixer && !driving) mixer.update(dt);
+    if(window.__a2ControlAfterMixer) window.__a2ControlAfterMixer();
+    updateDriveButtonVisibility();
+
+    const now = performance.now();
+    if(player && now - _lastPosSave > 2500){
+      _lastPosSave = now;
+      queueSave();
+    }
+  } else if(!gameStarted){
+    if(player) updateFollowCamera(dt);
+  }
+
+  updateLightMirrors();
+  renderer.render(scene, camera);
+}
+frame();
+bootGame();
+
+(function () {
+  const colorInput = document.getElementById('groundColor');
+  const brightnessInput = document.getElementById('groundBrightness');
+  const brightnessValue = document.getElementById('groundBrightnessValue');
+
+  function updateSimpleGround() {
+    if (typeof groundMat === 'undefined' || !groundMat) return;
+    const hex = (colorInput && colorInput.value) ? colorInput.value : (env.groundColor || '#7a8a6e');
+    const brightness = brightnessInput ? Number(brightnessInput.value) || 1 : (env.groundBrightness || 1);
+    groundMat.color.set(hex);
+    groundMat.color.multiplyScalar(brightness);
+    groundMat.needsUpdate = true;
+    if (typeof mirrorSharedUniforms !== 'undefined' && mirrorSharedUniforms.groundColor){
+      mirrorSharedUniforms.groundColor.value.copy(groundMat.color);
+    }
+    if (brightnessValue) brightnessValue.textContent = brightness.toFixed(2);
+    // keep env in sync so storage works
+    env.groundColor = hex;
+    env.groundBrightness = brightness;
+    if (typeof queueSave === 'function') queueSave();
+  }
+
+  if (colorInput) colorInput.addEventListener('input', updateSimpleGround);
+  if (brightnessInput) brightnessInput.addEventListener('input', updateSimpleGround);
+})();
+
+// === a2.html Control system: exact joint list + live manual bone offsets + 3D point editor ===
+(function(){
+ const $id=id=>document.getElementById(id);
+ const miniPanel=$id('threeDControlPanel');
+ function closePanels(){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('open'));document.querySelectorAll('.topbtn').forEach(b=>b.classList.remove('active'))}
+ function openPanel(id,btn){const was=$id(id).classList.contains('open');closePanels();if(!was){$id(id).classList.add('open');btn.classList.add('active');}}
+ $id('controlBtn').onclick=()=>openPanel('controlsPanel',$id('controlBtn'));
+ $id('threeDControlBtn').onclick=()=>{openPanel('threeDControlPanel',$id('threeDControlBtn'));setTimeout(resizeMini,60);syncMiniModel()};
+ document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>{if(['controlsPanel','threeDControlPanel'].includes(b.dataset.close)){ $id(b.dataset.close).classList.remove('open');$id('controlBtn').classList.remove('active');$id('threeDControlBtn').classList.remove('active')}},true));
+ // This is the full joint catalog and alias map from a2.html.
+ const jointDefinitions=[['Head','Head'],['Neck','Neck'],['Spine','Spine'],['RightShoulder','Right Shoulder'],['RightArm','Right Arm'],['RightForeArm','Right Forearm (Elbow)'],['RightWrist','Right Wrist'],['RightFingersMCP','Right Fingers MCP'],['RightFingersPIP','Right Fingers PIP'],['RightFingersDIP','Right Fingers DIP'],['RightThumbMCP','Right Thumb MCP'],['RightThumbIP','Right Thumb IP'],['LeftShoulder','Left Shoulder'],['LeftArm','Left Arm'],['LeftForeArm','Left Forearm (Elbow)'],['LeftWrist','Left Wrist'],['LeftFingersMCP','Left Fingers MCP'],['LeftFingersPIP','Left Fingers PIP'],['LeftFingersDIP','Left Fingers DIP'],['LeftThumbMCP','Left Thumb MCP'],['LeftThumbIP','Left Thumb IP'],['RightUpLeg','Right Hip'],['RightLeg','Right Knee'],['RightFoot','Right Foot'],['LeftUpLeg','Left Hip'],['LeftLeg','Left Knee'],['LeftFoot','Left Foot']];
+ const boneMap={Head:['head'],Neck:['neck'],Spine:['spine','spine1','spine2'],RightShoulder:['rightshoulder'],RightArm:['rightarm'],RightForeArm:['rightforearm'],LeftShoulder:['leftshoulder'],LeftArm:['leftarm'],LeftForeArm:['leftforearm'],RightUpLeg:['rightupleg'],RightLeg:['rightleg'],RightFoot:['rightfoot'],LeftUpLeg:['leftupleg'],LeftLeg:['leftleg'],LeftFoot:['leftfoot'],RightWrist:['righthand'],RightFingersMCP:['righthandindex1','righthandmiddle1','righthandring1','righthandpinky1'],RightFingersPIP:['righthandindex2','righthandmiddle2','righthandring2','righthandpinky2'],RightFingersDIP:['righthandindex3','righthandmiddle3','righthandring3','righthandpinky3'],RightThumbMCP:['righthandthumb1','righthandthumb2'],RightThumbIP:['righthandthumb3'],LeftWrist:['lefthand'],LeftFingersMCP:['lefthandindex1','lefthandmiddle1','lefthandring1','lefthandpinky1'],LeftFingersPIP:['lefthandindex2','lefthandmiddle2','lefthandring2','lefthandpinky2'],LeftFingersDIP:['lefthandindex3','lefthandmiddle3','lefthandring3','lefthandpinky3'],LeftThumbMCP:['lefthandthumb1','lefthandthumb2'],LeftThumbIP:['lefthandthumb3']};
+ let selectedJoint='Head',currentSource=null,sourceBones={},miniBones={},miniPoints=[],miniRenderer=null,miniScene=null,miniCamera=null,miniRoot=null,miniRay=null,dragPoint=null,dragStart=null,activeAxis=null,gizmoGroup=null,centerPoint=null,centerDrag=null;const miniBaseRotations=new WeakMap();
+ const offsets={},applied=new WeakMap();
+ for(const [id] of jointDefinitions)offsets[id]=new THREE.Vector3();
+ window.__saveControlState=()=>({selectedJoint,isHolding,offsets:Object.fromEntries(Object.entries(offsets).map(([k,v])=>[k,v.toArray()])),miniCamera:{azimuth:miniAzimuth,elevation:miniElevation,radius:miniRadius}});
+ window.__restoreControlState=data=>{if(!data)return;try{if(data.selectedJoint)selectedJoint=data.selectedJoint;for(const [k,v] of Object.entries(data.offsets||{}))if(offsets[k]&&Array.isArray(v))offsets[k].fromArray(v);isHolding=!!data.isHolding;if(data.miniCamera){miniAzimuth=Number(data.miniCamera.azimuth)||0;miniElevation=Number(data.miniCamera.elevation)||0;miniRadius=Math.max(.5,Number(data.miniCamera.radius)||3.2)}applyOffsets();renderJointButtons();selectJoint(selectedJoint);if(miniRoot){syncMiniPose();updateMiniCamera()}if($id('gripBtn'))$id('gripBtn').textContent=isHolding?'Release Item':'Grip Item';}catch(e){console.warn('Control restore skipped',e)}};
+ async function readPosePresets(){try{const db=await dbOpen();return await new Promise(resolve=>{const tx=db.transaction(STORE_WORLD,'readonly'),r=tx.objectStore(STORE_WORLD).get('controlPoses');r.onsuccess=()=>resolve(r.result||[]);r.onerror=()=>resolve([])})}catch(_){return []}}
+ async function writePosePresets(rows){const db=await dbOpen();const tx=db.transaction(STORE_WORLD,'readwrite');tx.objectStore(STORE_WORLD).put(rows,'controlPoses');await new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+ function currentPoseSnapshot(){return {offsets:Object.fromEntries(Object.entries(offsets).map(([k,v])=>[k,v.toArray()])),isHolding,player:player?{position:player.position.toArray(),rotation:[player.rotation.x,player.rotation.y,player.rotation.z],scale:player.scale.toArray()}:null,selectedJoint}}
+ async function renderSavedPoses(){const box=$id('savedPosesList');if(!box)return;const rows=await readPosePresets();box.innerHTML='';if(!rows.length){box.innerHTML='<div class="sub">No saved poses yet.</div>';return}rows.forEach((pose,index)=>{const row=document.createElement('div');row.style.cssText='display:flex;gap:5px;align-items:center';const apply=document.createElement('button');apply.className='ctrl-btn';apply.style.flex='1';apply.textContent='▶ '+pose.name;apply.onclick=()=>applyPosePreset(pose);const del=document.createElement('button');del.className='ctrl-btn';del.textContent='×';del.title='Delete pose';del.onclick=async()=>{const list=await readPosePresets();list.splice(index,1);await writePosePresets(list);renderSavedPoses();toast('Pose deleted')};row.append(apply,del);box.appendChild(row)})}
+ async function applyPosePreset(pose){try{for(const [k,v] of Object.entries(pose.offsets||{}))if(offsets[k]&&Array.isArray(v))offsets[k].fromArray(v);if(typeof pose.isHolding==='boolean')isHolding=pose.isHolding;applyOffsets();if(player&&pose.player){if(pose.player.position)player.position.fromArray(pose.player.position);if(pose.player.rotation)player.rotation.set(...pose.player.rotation);if(pose.player.scale)player.scale.fromArray(pose.player.scale)}if(pose.selectedJoint)selectedJoint=pose.selectedJoint;selectJoint(selectedJoint);if(miniRoot){syncMiniPose();updateMiniCamera()}$id('gripBtn').textContent=isHolding?'Release Item':'Grip Item';queueSave();toast('Applied pose: '+pose.name)}catch(e){console.warn(e);toast('Could not apply pose')}}
+ $id('savePoseBtn')?.addEventListener('click',async()=>{const name=($id('poseName')?.value||'').trim()||('Pose '+(Date.now().toString().slice(-4)));try{const rows=await readPosePresets();rows.push({id:Date.now(),name,...currentPoseSnapshot()});await writePosePresets(rows);$id('poseName').value='';await renderSavedPoses();toast('Saved pose: '+name)}catch(e){console.warn(e);toast('Could not save pose')}});
+ renderSavedPoses();
+
+ function findBones(root){const map={};for(const key in boneMap)map[key]=[];if(!root)return map;root.traverse(o=>{if(!o.isBone)return;const n=o.name.toLowerCase().replace(/[^a-z0-9]/g,'');for(const key in boneMap){if(boneMap[key].some(alias=>n.includes(alias))){if((n.includes('index')||n.includes('middle')||n.includes('ring')||n.includes('pinky')||n.includes('thumb'))&&(key==='RightWrist'||key==='LeftWrist'))continue;map[key].push(o);break}}});return map}
+ function sourceRoot(){return playerVisual||null}
+ function refreshSource(){const src=sourceRoot();if(src===currentSource)return;currentSource=src;sourceBones=findBones(src);for(const k in sourceBones)for(const b of sourceBones[k])applied.delete?.(b);renderJointButtons();if(miniPanel.classList.contains('open'))syncMiniModel()}
+ function renderJointButtons(){const bar=$id('jointBar');bar.innerHTML='';for(const [id,label] of jointDefinitions){const b=document.createElement('button');b.className='joint-btn'+(id===selectedJoint?' active':'');b.textContent=label;b.dataset.joint=id;b.onclick=()=>selectJoint(id);bar.appendChild(b)}if(!sourceRoot())$id('miniStatus').textContent='Load a character to enable joint movement.'}
+ function selectJoint(id){selectedJoint=id;document.querySelectorAll('#jointBar .joint-btn').forEach(b=>b.classList.toggle('active',b.dataset.joint===id));highlightPoint(id);$id('miniStatus').textContent='Selected: '+(jointDefinitions.find(x=>x[0]===id)?.[1]||id)}
+ function applyOffsets(){refreshSource();for(const key in sourceBones){for(const bone of sourceBones[key]){const old=applied.get(bone);if(old){bone.rotation.x-=old.x;bone.rotation.y-=old.y;bone.rotation.z-=old.z;applied.delete(bone)}}}for(const key in sourceBones){const off=offsets[key];if(!off)continue;for(const bone of sourceBones[key]){bone.rotation.x+=off.x;bone.rotation.y+=off.y;bone.rotation.z+=off.z;applied.set(bone,off.clone())}}}
+ window.__a2ControlBeforeMixer=function(){for(const key in sourceBones){for(const bone of sourceBones[key]){const old=applied.get(bone);if(old){bone.rotation.x-=old.x;bone.rotation.y-=old.y;bone.rotation.z-=old.z;applied.delete(bone)}}}};
+ window.__a2ControlAfterMixer=applyOffsets;
+ function rotateSelected(axis,value){refreshSource();if(!(sourceBones[selectedJoint]||[]).length){toast('No matching '+selectedJoint+' bone in the loaded model');return}offsets[selectedJoint][axis]+=value;applyOffsets();if(miniRoot)syncMiniPose();queueSave();toast((jointDefinitions.find(x=>x[0]===selectedJoint)||[])[1]+' adjusted')}
+ document.querySelectorAll('[data-joint-rot]').forEach(b=>b.onclick=()=>{const [axis,val]=b.dataset.jointRot.split(',');rotateSelected(axis,+val)});
+ $id('resetControlJoint').onclick=$id('miniResetJoint').onclick=()=>{offsets[selectedJoint]?.set(0,0,0);applyOffsets();syncMiniPose();queueSave()};
+ $id('resetControlAll').onclick=$id('miniResetAll').onclick=()=>{Object.values(offsets).forEach(v=>v.set(0,0,0));applyOffsets();syncMiniPose();queueSave()};
+ document.querySelectorAll('[data-control-pose]').forEach(b=>b.onclick=()=>{if(!player){toast('Load a character first');return}player.rotation.x=b.dataset.controlPose==='supine'?-Math.PI/2:b.dataset.controlPose==='prone'?Math.PI/2:0;queueSave();toast('Pose: '+b.textContent)});
+ $id('controlElevUp').onclick=()=>{if(player){player.position.y+=.1;queueSave()}};$id('controlElevDown').onclick=()=>{if(player){player.position.y=Math.max(0,player.position.y-.1);queueSave()}};
+ $id('controlIdle').onclick=()=>{const idle=findAction([/^idle$/i,/idle/i,/^stand$/i,/standing/i]);if(idle)playAction(idle,THREE.LoopRepeat);else toast('No idle/stand clip in this model')};
+ let isHolding=false;$id('gripBtn').onclick=()=>{isHolding=!isHolding;for(const k of ['RightFingersMCP','RightFingersPIP','RightFingersDIP','RightThumbMCP','RightThumbIP','LeftFingersMCP','LeftFingersPIP','LeftFingersDIP','LeftThumbMCP','LeftThumbIP'])if(offsets[k])offsets[k].set(0,isHolding&&k==='RightThumbMCP'?.5:0,isHolding?(k.includes('Thumb')?.55:.85):0);$id('gripBtn').textContent=isHolding?'Release Item':'Grip Item';applyOffsets();queueSave()};
+ function ensureMini(){if(miniRenderer)return;const c=$id('mini3d');miniScene=new THREE.Scene();miniScene.background=new THREE.Color(0x0b1017);miniCamera=new THREE.PerspectiveCamera(34,1,.01,100);miniCamera.position.set(0,1.25,3.4);miniRay=new THREE.Raycaster();miniRenderer=new THREE.WebGLRenderer({canvas:c,alpha:true,antialias:true,powerPreference:'low-power'});miniRenderer.setPixelRatio(Math.min(devicePixelRatio,1.25));miniRenderer.setSize(c.clientWidth||320,c.clientHeight||220,false);miniScene.add(new THREE.HemisphereLight(0xdcecff,0x303744,2));const key=new THREE.DirectionalLight(0xffffff,2);key.position.set(2,4,4);miniScene.add(key);const rim=new THREE.DirectionalLight(0x82caff,1.1);rim.position.set(-3,2,-3);miniScene.add(rim);const floor=new THREE.Mesh(new THREE.CircleGeometry(1.5,32),new THREE.MeshBasicMaterial({color:0x17212b,transparent:true,opacity:.7}));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;miniScene.add(floor);miniLoop()}
+ function miniLoop(){if(!miniRenderer)return;requestAnimationFrame(miniLoop);if(miniRoot){miniRoot.updateMatrixWorld(true);updateMiniPoints()}miniRenderer.render(miniScene,miniCamera)}
+ function resizeMini(){ensureMini();const c=$id('mini3d'),w=Math.max(1,c.clientWidth),h=Math.max(1,c.clientHeight);miniRenderer.setSize(w,h,false);miniCamera.aspect=w/h;miniCamera.updateProjectionMatrix()}
+ function buildGizmo(){if(gizmoGroup){miniScene.remove(gizmoGroup);gizmoGroup.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)o.material.dispose()})}gizmoGroup=new THREE.Group();gizmoGroup.userData.kind='gizmo';const defs=[['x',0xff4545,new THREE.Vector3(1,0,0)],['y',0x38ff83,new THREE.Vector3(0,1,0)],['z',0x399dff,new THREE.Vector3(0,0,1)]];for(const [axis,color,dir] of defs){const mat=new THREE.MeshBasicMaterial({color,depthTest:false});const line=new THREE.Mesh(new THREE.CylinderGeometry(.012,.012,.78,7),mat);line.position.copy(dir.clone().multiplyScalar(.39));line.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);line.renderOrder=20;line.userData={kind:'axis',axis};gizmoGroup.add(line);const cone=new THREE.Mesh(new THREE.ConeGeometry(.065,.17,10),mat);cone.position.copy(dir.clone().multiplyScalar(.82));cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);cone.renderOrder=21;cone.userData={kind:'axis',axis};gizmoGroup.add(cone)}miniScene.add(gizmoGroup);if(centerPoint){miniScene.remove(centerPoint);centerPoint.geometry.dispose();centerPoint.material.dispose()}centerPoint=new THREE.Mesh(new THREE.SphereGeometry(.105,16,12),new THREE.MeshBasicMaterial({color:0xffd85a,depthTest:false}));centerPoint.userData.kind='center';centerPoint.renderOrder=22;miniScene.add(centerPoint)}
+ function placeGizmo(){if(!miniRoot||!gizmoGroup)return;let point;if(selectedJoint==='__ROOT__'){point=miniRoot.getWorldPosition(new THREE.Vector3())}else{const arr=miniBones[selectedJoint]||[];point=arr[0]?arr[0].getWorldPosition(new THREE.Vector3()):miniRoot.getWorldPosition(new THREE.Vector3())}gizmoGroup.position.copy(point);gizmoGroup.scale.setScalar(Math.max(.72,Math.min(1.25,(miniRadius||3)*.28)));centerPoint.position.copy(miniRoot.getWorldPosition(new THREE.Vector3()));}
+ function syncMiniModel(){ensureMini();refreshSource();const src=sourceRoot();if(!src){$id('miniStatus').textContent='Load a character to begin.';return}if(miniRoot&&miniRoot.userData.source===src){syncMiniPose();return}if(miniRoot)miniScene.remove(miniRoot);miniRoot=src.clone(true);miniRoot.userData.source=src;miniRoot.position.set(0,0,0);miniRoot.rotation.set(0,0,0);miniRoot.scale.setScalar(1);miniScene.add(miniRoot);miniBones=findBones(miniRoot);for(const k in miniBones)for(const b of miniBones[k])miniBaseRotations.set(b,b.rotation.clone());miniPoints.forEach(p=>{miniScene.remove(p);p.geometry.dispose();p.material.dispose()});miniPoints=[];for(const [id] of jointDefinitions){if(!(miniBones[id]||[]).length)continue;const p=new THREE.Mesh(new THREE.SphereGeometry(.075,16,12),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:1}));p.userData.joint=id;miniScene.add(p);miniPoints.push(p)}frameMini();buildGizmo();syncMiniPose();$id('miniStatus').textContent=miniPoints.length?'Drag glowing points to adjust the same joint on the main character.':'This model has no recognizable joint bones.';}
+ function syncMiniPose(){if(!miniRoot)return;for(const key in miniBones){for(const bone of miniBones[key]){const base=miniBaseRotations.get(bone),off=offsets[key];if(base){bone.rotation.copy(base);if(off){bone.rotation.x+=off.x;bone.rotation.y+=off.y;bone.rotation.z+=off.z}}}}miniRoot.updateMatrixWorld(true)}
+ function updateMiniPoints(){if(!miniRoot)return;miniRoot.updateMatrixWorld(true);for(const p of miniPoints){const arr=miniBones[p.userData.joint]||[];if(arr[0])arr[0].getWorldPosition(p.position)}placeGizmo()}
+ function highlightPoint(id){miniPoints.forEach(p=>{const active=p.userData.joint===id;p.material.color.set(0xffffff);p.scale.setScalar(active?1.45:1)});if(gizmoGroup)gizmoGroup.visible=id!=='__ROOT__'}
+ function frameMini(){if(!miniRoot)return;const box=new THREE.Box3().setFromObject(miniRoot),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());miniRoot.position.sub(center);const h=Math.max(size.y,.8);miniRoot.scale.setScalar(1.18);miniCamera.position.set(0,h*.52,Math.max(1.65,h*1.72));miniCamera.lookAt(0,0,0);miniCamera.updateProjectionMatrix();miniRadius=Math.max(1.65,h*1.72);miniAzimuth=0;miniElevation=0;updateMiniCamera()}
+ let miniAzimuth=0,miniElevation=0,miniRadius=3.2;
+ function updateMiniCamera(){if(!miniRoot)return;const box=new THREE.Box3().setFromObject(miniRoot),size=box.getSize(new THREE.Vector3()),center=box.getCenter(new THREE.Vector3());const h=Math.max(size.y,1);miniCamera.position.set(center.x+Math.sin(miniAzimuth)*miniRadius,center.y+h*.18+Math.sin(miniElevation)*miniRadius,center.z+Math.cos(miniAzimuth)*miniRadius);miniCamera.lookAt(center);miniCamera.updateProjectionMatrix()}
+ $id('resetTransform').onclick=()=>{if(player){player.position.set(0,0,0);player.rotation.set(0,0,0);orbitControls.userData.followInitialized=false;Object.values(offsets).forEach(v=>v.set(0,0,0));applyOffsets();selectedJoint='Head';highlightPoint(selectedJoint);toast('Character reset')}};
+ $id('miniCenter').onclick=()=>{miniAzimuth=0;miniElevation=0;frameMini();updateMiniCamera()};
+ function pointerPoint(e){const r=$id('mini3d').getBoundingClientRect();return new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1)}
+ let miniViewDrag=null;
+ function nearestAxis(e){const rect=$id('mini3d').getBoundingClientRect();let best=null,dist=1e9;for(const o of gizmoGroup?.children||[]){if(o.userData.kind!=='axis')continue;const v=o.getWorldPosition(new THREE.Vector3()).project(miniCamera),sx=rect.left+(v.x+1)*rect.width/2,sy=rect.top+(1-v.y)*rect.height/2,d=Math.hypot(sx-e.clientX,sy-e.clientY);if(d<dist){dist=d;best=o.userData.axis}}return dist<48?best:null}
+ $id('mini3d').addEventListener('pointerdown',e=>{syncMiniModel();e.preventDefault();const rect=$id('mini3d').getBoundingClientRect(),pt=pointerPoint(e);miniRay.setFromCamera(pt,miniCamera);if(centerPoint&&miniRay.intersectObject(centerPoint,false).length){selectedJoint='__ROOT__';gizmoGroup.visible=false;centerDrag={x:e.clientX,y:e.clientY,pos:player?player.position.clone():new THREE.Vector3()};$id('miniStatus').textContent='Whole character selected · drag to move in 3D';}
+ else {const axis=nearestAxis(e);if(axis){activeAxis=axis;dragStart={x:e.clientX,y:e.clientY,base:offsets[selectedJoint].clone(),pos:player?player.position.clone():new THREE.Vector3()};}
+ else {let hits=miniRay.intersectObjects(miniPoints,false);if(!hits.length){let best=null,bestD=42;for(const point of miniPoints){const v=point.position.clone().project(miniCamera),sx=rect.left+(v.x+1)*rect.width/2,sy=rect.top+(1-v.y)*rect.height/2,d=Math.hypot(sx-e.clientX,sy-e.clientY);if(d<bestD){bestD=d;best=point}}if(best)hits=[{object:best}]}
+ if(hits.length){dragPoint=hits[0].object;selectJoint(dragPoint.userData.joint);activeAxis=null;dragStart={x:e.clientX,y:e.clientY,base:offsets[selectedJoint].clone()};}else miniViewDrag={x:e.clientX,y:e.clientY,az:miniAzimuth,el:miniElevation};}}
+ try{$id('mini3d').setPointerCapture(e.pointerId)}catch(_){} });
+ $id('mini3d').addEventListener('pointermove',e=>{if(centerDrag&&player){e.preventDefault();const dx=(e.clientX-centerDrag.x)*.012,dy=(e.clientY-centerDrag.y)*.014;player.position.x=centerDrag.pos.x+dx;player.position.y=centerDrag.pos.y-dy;player.position.z=centerDrag.pos.z;queueSave();return}if(dragStart&&(dragPoint||activeAxis)){e.preventDefault();const dx=e.clientX-dragStart.x,dy=e.clientY-dragStart.y,speed=.018;if(activeAxis==='x')offsets[selectedJoint].x=dragStart.base.x+dx*speed;else if(activeAxis==='y')offsets[selectedJoint].y=dragStart.base.y-dy*speed;else if(activeAxis==='z')offsets[selectedJoint].z=dragStart.base.z-dy*speed;else {offsets[selectedJoint].y=dragStart.base.y+dx*speed;offsets[selectedJoint].x=dragStart.base.x+dy*speed;}applyOffsets();syncMiniPose();queueSave();return}if(miniViewDrag){e.preventDefault();miniAzimuth=miniViewDrag.az+(e.clientX-miniViewDrag.x)*.025;miniElevation=THREE.MathUtils.clamp(miniViewDrag.el+(e.clientY-miniViewDrag.y)*.02,-1.1,1.25);updateMiniCamera()}});
+ const endDrag=()=>{if(dragStart||centerDrag)queueSave();dragPoint=null;dragStart=null;miniViewDrag=null;activeAxis=null;centerDrag=null;queueSave();};$id('mini3d').addEventListener('pointerup',endDrag);$id('mini3d').addEventListener('pointercancel',endDrag);
+ setInterval(()=>{refreshSource();if(miniPanel.classList.contains('open'))syncMiniModel()},700);
+})();
+
+
+// Persist the latest world/camera/control state when the app is backgrounded or closed.
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){try{saveState()}catch(_){}}});
+window.addEventListener('pagehide',()=>{try{saveState()}catch(_){}});
+</script>
+</body>
+</html>
