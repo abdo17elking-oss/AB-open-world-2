@@ -1,61 +1,64 @@
 name: Build AB Open World Native APK
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
-      - master
+workflow_dispatch:
+push:
+branches:
+- main
+- master
 
 permissions:
-  contents: read
+contents: read
 
 jobs:
-  build-android:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+build-android:
+runs-on: ubuntu-latest
+timeout-minutes: 60
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+steps:
+  - name: Checkout
+    uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+  - name: Setup Node
+    uses: actions/setup-node@v4
+    with:
+      node-version: 20
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
+  - name: Setup Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
-        with:
-          accept-android-sdk-licenses: true
-          log-accepted-android-sdk-licenses: false
+  - name: Setup Android SDK
+    uses: android-actions/setup-android@v4
+    with:
+      accept-android-sdk-licenses: true
+      log-accepted-android-sdk-licenses: false
 
-      - name: Install JavaScript dependencies
-        run: npm install --no-audit --no-fund
+  - name: Install JavaScript dependencies
+    run: npm install --no-audit --no-fund
 
-      - name: Generate native Android project
-        run: npx expo prebuild --platform android --no-install --clean
+  - name: Align Expo dependencies
+    run: npx expo install --fix
 
-      - name: Build native debug APK
-        run: |
-          chmod +x android/gradlew
-          cd android
-          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+  - name: Generate native Android project
+    run: npx expo prebuild --platform android --no-install --clean
 
-      - name: Prepare APK
-        run: |
-          cp android/app/build/outputs/apk/debug/app-debug.apk AB_Open_World_Native.apk
+  - name: Build native debug APK
+    run: |
+      chmod +x android/gradlew
+      cd android
+      ./gradlew :app:assembleDebug --no-daemon --stacktrace
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: AB-OPEN-WORLD-NATIVE-APK
-          path: AB_Open_World_Native.apk
-          if-no-files-found: error
-          retention-days: 14
+  - name: Prepare APK
+    run: |
+      cp android/app/build/outputs/apk/debug/app-debug.apk AB_Open_World_Native.apk
+
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: AB-OPEN-WORLD-NATIVE-APK
+      path: AB_Open_World_Native.apk
+      if-no-files-found: error
+      retention-days: 14
