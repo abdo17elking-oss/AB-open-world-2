@@ -6,18 +6,14 @@ on:
     branches:
       - main
       - master
-    paths-ignore:
-      - README_AR.md
-      - reference/**
 
 permissions:
   contents: read
-  actions: write
 
 jobs:
   build-android:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -35,7 +31,10 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
+        with:
+          accept-android-sdk-licenses: true
+          log-accepted-android-sdk-licenses: false
 
       - name: Install JavaScript dependencies
         run: npm install --no-audit --no-fund
@@ -50,7 +49,8 @@ jobs:
           ./gradlew :app:assembleDebug --no-daemon --stacktrace
 
       - name: Prepare APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk AB_Open_World_Native.apk
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk AB_Open_World_Native.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
